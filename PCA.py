@@ -1,6 +1,6 @@
 from DimReducer import DimReducer
 import numpy as np
-from sklearn.decomposition import PCA
+import sklearn.decomposition
 
 class PCA ( DimReducer ):
     def __init__ (self, dimLow):
@@ -15,6 +15,6 @@ class PCA ( DimReducer ):
             raise TypeError
         if len(data[0])<self.dimLow:
             raise ValueError
-        pca = PCA(n_components=self.dimLow, svd_solver='full')
+        pca = sklearn.decomposition.PCA(n_components=self.dimLow, svd_solver='full')
         reducedData = pca.fit_transform(data)
         return reducedData

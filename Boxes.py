@@ -73,11 +73,11 @@ class Boxes( object ):
         if len(data[0])>3:
             raise ValueError
         n=len(data[0])
-        rescaled_data=rescale_data(data)
+        rescaled_data=self.rescale_data(data)
         pairs=[]
         for idx1 in range(0,len(rescaled_data)):
             for idx2 in range(idx1+1,len(rescaled_data)):
-                boolean = TRUE
+                boolean = True
                 for i in range(0,n):
                     boolean=boolean and (rescaled_data[idx2][i]<=rescaled_data[idx1][i]+1) and (rescaled_data[idx2][i]>=rescaled_data[idx1][i]-1)
                 if boolean:

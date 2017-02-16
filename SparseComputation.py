@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 
 class SparseComputation:
@@ -86,8 +87,8 @@ class SparseComputation:
             raise ValueError
         n = len(data[0])
         result = {}
-        for i in range(0, n):
-            box_id = str(self._index_to_boxe_id(data[i]))
+        for i in range(0, len(data)):
+            box_id = self._index_to_boxe_id(data[i])
             if not (box_id in result):
                 result[box_id] = []
             result[box_id].append(i)
@@ -102,4 +103,16 @@ class SparseComputation:
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
+        for box_id in boxes_dict:
+            for j in itertools.product(boxes_dict[box_id], boxes_dict[box_id]):
+                pairs.append(j)
+            for i in range(0, n):
+                id_plus = box_id + self.gridResolution**i
+                id_minus = box_id - self.gridResolution**i
+                if id_plus in boxes_dict:
+                    for j in itertools.product(boxes_dict[box_id], boxes_dict[id_plus]):
+                        pairs.append(j)
+                if id_minus in boxes_dict:
+                    for j in itertools.product(boxes_dict[box_id], boxes_dict[id_minus]):
+                        pairs.append(j)
         return pairs

@@ -81,6 +81,12 @@ class SparseComputation:
         return result
 
     def _get_boxes(self, data):
+        '''
+        get the data after rescaling
+        sort it in boxes
+        input: np.array
+        output: dict of boxes
+        '''
         if not isinstance(data, np.ndarray):
             raise TypeError
         if len(data[0]) > 3:
@@ -95,6 +101,12 @@ class SparseComputation:
         return result
 
     def get_sim_indices(self, data):
+        '''
+        get reduced dimension data returns a list of one way pairs for
+        similarities to be computed
+        input: np.array
+        output: list of pairs
+        '''
         if not isinstance(data, np.ndarray):
             raise TypeError
         if len(data[0]) > 3:

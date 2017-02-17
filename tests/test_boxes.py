@@ -45,4 +45,4 @@ class TestPCA( unittest.TestCase ):
         self.assertRaises(ValueError,self.b.get_pairs,np.array([[1,1,1,1,1,1]]))
         pairs=np.array(self.b.get_pairs(self.data))
         expected_pairs=np.array([(0,1),(0,4),(1,2),(1,4)])
-        np.testing.assert_array_almost_equal(pairs,expected_pairs,decimal=)
+        np.testing.assert_array_almost_equal(pairs,expected_pairs,decimal=6)

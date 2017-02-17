@@ -46,5 +46,5 @@ class TestPCA(unittest.TestCase):
         self.assertRaises(TypeError, self.b.get_sim_indices,[])
         self.assertRaises(ValueError,self.b.get_sim_indices,np.array([[1,1,1,1,1,1]]))
         pairs=np.array(self.b.get_sim_indices(self.data))
-        expected_pairs=np.array([(0,1),(0,4),(1,2),(1,4)])
+        expected_pairs=np.array([(0,0),(0,1),(0,4),(1,0),(1,1),(1,4),(4,0),(4,1),(4,4),(0,3),(1,3),(4,3),(3,3),(3,0),(3,1),(3,4),(2,2)])
         np.testing.assert_array_almost_equal(pairs,expected_pairs,decimal=6)

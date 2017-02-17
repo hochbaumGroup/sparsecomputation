@@ -71,6 +71,21 @@ class ApproximatePCA(DimReducer):
         transposed_data = np.transpose(data)
         for idx in list_col:
             result.append(np.copy(transposed_data[i]))
+        result = np.array(result)
+        return np.transpose(result)
+
+    def _row_reduction(self, data):
+        if not isinstance(data, np.ndarray):
+            return TypeError
+        proba_row = self._get_proba_row(data)
+        n = len(data)
+        if n != len(proba_row):
+            raise TypeError
+        n_row = max(self.minRow, n*self.percRows/100.0)
+        list_rows = np.random.choice(range(0, n), n_row, 1, proba_row)
+        result = []
+        for idx in list_rows:
+            result.append(np.copy(data[idx]))
         return np.array(result)
 
     def fit_transform(self, data):

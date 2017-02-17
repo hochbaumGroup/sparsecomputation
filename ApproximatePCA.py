@@ -58,5 +58,20 @@ class ApproximatePCA(DimReducer):
             proba_row.append(sum(row**2)/Frobenius)
         return proba_row
 
-    def fit_transform( self, data ):
+    def _col_reduction(self, data):
+        if not isinstance(data, np.ndarray):
+            return TypeError
+        proba_col = self._get_proba_col(data)
+        n = len(data[0])
+        n_col = max(self.minCol, n*self.percCol / 100.0)
+        if n != len(proba_col):
+            raise TypeError
+        list_col = np.random.choice(range(0, n), n_col, 1, proba_col)
+        result = []
+        transposed_data = np.transpose(data)
+        for idx in list_col:
+            result.append(np.copy(transposed_data[i]))
+        return np.array(result)
+
+    def fit_transform(self, data):
         return data

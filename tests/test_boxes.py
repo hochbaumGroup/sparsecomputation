@@ -39,12 +39,10 @@ class TestPCA( unittest.TestCase ):
         np.testing.assert_array_almost_equal(minimum, np.array([0,0,0]), decimal=6)
         maximum=np.array(self.b.get_max(rescaled_data))
         np.testing.assert_array_almost_equal(maximum, np.array([self.gridResolution,self.gridResolution,self.gridResolution]), decimal=6)
-        print rescaled_data
 
     def test_get_pairs ( self ):
         self.assertRaises(TypeError,self.b.get_pairs,[])
         self.assertRaises(ValueError,self.b.get_pairs,np.array([[1,1,1,1,1,1]]))
         pairs=np.array(self.b.get_pairs(self.data))
         expected_pairs=np.array([(0,1),(0,4),(1,2),(1,4)])
-        print pairs
-        np.testing.assert_array_almost_equal(pairs,expected_pairs,decimal=6)
+        np.testing.assert_array_almost_equal(pairs,expected_pairs,decimal=)

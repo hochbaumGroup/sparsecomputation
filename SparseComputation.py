@@ -5,9 +5,12 @@ import itertools
 class SparseComputation:
 
     def __init__(self, dimReducer, gridResolution=25):
+        if not isinstance(gridResolution, int):
+            raise TypeError
+        if gridResolution < 1:
+            raise ValueError
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
-        return self
 
     def _get_min(self, data):
         '''
@@ -69,15 +72,15 @@ class SparseComputation:
         return np.array(rescaled_data)
 
     def _index_to_boxe_id(self, array):
-        if not isinstance(array, np.array):
+        if not isinstance(array, np.ndarray):
             raise TypeError
         if len(array) > 3:
             raise ValueError
-        if not isinstance(array[0], float):
+        if not isinstance(array[0], int):
             raise TypeError
         result = 0
         for i in range(0, len(array)):
-            res += array[i]*self.gridResolution**i
+            result += array[i]*self.gridResolution**i
         return result
 
     def _get_boxes(self, data):

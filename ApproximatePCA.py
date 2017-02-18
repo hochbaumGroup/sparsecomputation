@@ -1,5 +1,6 @@
 from DimReducer import DimReducer
 import numpy as np
+import sklearn.decomposition
 
 
 class ApproximatePCA(DimReducer):
@@ -89,4 +90,11 @@ class ApproximatePCA(DimReducer):
         return np.array(result)
 
     def fit_transform(self, data):
+        if not isinstance(data, np.ndarray):
+            return TypeError
+        col_reduced_data = self._col_reduction(data)
+        reduced_data = self._row_reduction(col_reduced_data)
+        pca = sklearn.decomposition.PCA(n_components=self.dimLow, svd_solver='full')
+        pca.fit(reduced_data)
+        data = pca.transform(data)
         return data

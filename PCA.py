@@ -2,19 +2,21 @@ from DimReducer import DimReducer
 import numpy as np
 import sklearn.decomposition
 
-class PCA ( DimReducer ):
-    def __init__ (self, dimLow):
+
+class PCA (DimReducer):
+    def __init__(self, dimLow):
         if not isinstance(dimLow, int):
             raise TypeError
-        if dimLow<2:
+        if dimLow < 2:
             raise ValueError
         self.dimLow = dimLow
 
-    def fit_transform (self, data):
+    def fit_transform(self, data):
         if not isinstance(data, np.ndarray):
             raise TypeError
-        if len(data[0])<self.dimLow:
+        if len(data[0]) < self.dimLow:
             raise ValueError
-        pca = sklearn.decomposition.PCA(n_components=self.dimLow, svd_solver='full')
+        pca = sklearn.decomposition.PCA(n_components=self.dimLow,
+                                        svd_solver='full')
         reducedData = pca.fit_transform(data)
         return reducedData

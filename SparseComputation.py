@@ -125,9 +125,11 @@ class SparseComputation:
                 id_plus = box_id + self.gridResolution**i
                 id_minus = box_id - self.gridResolution**i
                 if id_plus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id], boxes_dict[id_plus]):
+                    for j in itertools.product(boxes_dict[box_id],
+                                               boxes_dict[id_plus]):
                         pairs.append(j)
                 if id_minus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id], boxes_dict[id_minus]):
+                    for j in itertools.product(boxes_dict[box_id],
+                                               boxes_dict[id_minus]):
                         pairs.append(j)
         return pairs

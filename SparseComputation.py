@@ -6,9 +6,9 @@ class SparseComputation:
 
     def __init__(self, dimReducer, gridResolution=25):
         if not isinstance(gridResolution, int):
-            raise TypeError
+            raise TypeError('gridResolution should be a positive integer')
         if gridResolution < 1:
-            raise ValueError
+            raise ValueError('gridResolution should be a positive integer')
 
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
@@ -20,9 +20,10 @@ class SparseComputation:
         output: list of length dimLow
         '''
         if not isinstance(data, np.ndarray):
-            raise TypeError
+            raise TypeError('Data should be a Numpy array')
         if len(data[0]) > 3:
-            raise ValueError
+            raise ValueError('Data should have at most three collumns, make' +
+                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         minimum = np.copy(data[0])
@@ -39,9 +40,10 @@ class SparseComputation:
         output: list of length dimLow
         '''
         if not isinstance(data, np.ndarray):
-            raise TypeError
+            raise TypeError('Data should be a Numpy array')
         if len(data[0]) > 3:
-            raise ValueError
+            raise ValueError('Data should have at most three collumns, make' +
+                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         maximum = np.copy(data[0])
@@ -58,9 +60,10 @@ class SparseComputation:
         output: numpy array
         '''
         if not isinstance(data, np.ndarray):
-            raise TypeError
+            raise TypeError('Data should be a Numpy array')
         if len(data[0]) > 3:
-            raise ValueError
+            raise ValueError('Data should have at most three collumns, make' +
+                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         maximum = self._get_max(data)
@@ -88,11 +91,13 @@ class SparseComputation:
         output: int
         '''
         if not isinstance(array, np.ndarray):
-            raise TypeError
+            raise TypeError('The coordinates of the box' +
+                            'should be a Numpy array')
         if len(array) > 3:
-            raise ValueError
+            raise ValueError('The coordinates of a box should have at most' +
+                             'three components')
         if not isinstance(array[0], int):
-            raise TypeError
+            raise TypeError('The coordinates of the box should be integer')
 
         result = 0
         for i in range(0, len(array)):
@@ -107,9 +112,10 @@ class SparseComputation:
         output: dict of boxes
         '''
         if not isinstance(data, np.ndarray):
-            raise TypeError
+            raise TypeError('Data should be a Numpy array')
         if len(data[0]) > 3:
-            raise ValueError
+            raise ValueError('Data should have at most three collumns, make' +
+                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         result = {}

@@ -9,6 +9,7 @@ class SparseComputation:
             raise TypeError
         if gridResolution < 1:
             raise ValueError
+
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
 
@@ -22,6 +23,7 @@ class SparseComputation:
             raise TypeError
         if len(data[0]) > 3:
             raise ValueError
+
         n = len(data[0])
         minimum = np.copy(data[0])
         for vec in data:
@@ -40,6 +42,7 @@ class SparseComputation:
             raise TypeError
         if len(data[0]) > 3:
             raise ValueError
+
         n = len(data[0])
         maximum = np.copy(data[0])
         for vec in data:
@@ -49,10 +52,16 @@ class SparseComputation:
         return maximum
 
     def _rescale_data(self, data):
+        '''
+        Rescale the data from 0 to gridResolution-1
+        input: numpy array
+        output: numpy array
+        '''
         if not isinstance(data, np.ndarray):
             raise TypeError
         if len(data[0]) > 3:
             raise ValueError
+
         n = len(data[0])
         maximum = self._get_max(data)
         minimum = self._get_min(data)
@@ -72,12 +81,19 @@ class SparseComputation:
         return np.array(rescaled_data)
 
     def _index_to_boxe_id(self, array):
+        '''
+        Takes the coordinates of a box as input, retunr the id of this box in
+        the dictionary
+        input: numpy array
+        output: int
+        '''
         if not isinstance(array, np.ndarray):
             raise TypeError
         if len(array) > 3:
             raise ValueError
         if not isinstance(array[0], int):
             raise TypeError
+
         result = 0
         for i in range(0, len(array)):
             result += array[i]*self.gridResolution**i
@@ -94,6 +110,7 @@ class SparseComputation:
             raise TypeError
         if len(data[0]) > 3:
             raise ValueError
+
         n = len(data[0])
         result = {}
         for i in range(0, len(data)):
@@ -114,6 +131,7 @@ class SparseComputation:
             raise TypeError
         if len(data[0]) > 3:
             raise ValueError
+
         n = len(data[0])
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)

@@ -126,7 +126,7 @@ class SparseComputation:
             result[box_id].append(i)
         return result
 
-    def get_sim_indices(self, data):
+    def _get_pairs(self, data):
         '''
         get reduced dimension data returns a list of one way pairs for
         similarities to be computed
@@ -157,3 +157,15 @@ class SparseComputation:
                                                boxes_dict[id_minus]):
                         pairs.append(j)
         return pairs
+
+    def get_similar_indices(slef, data):
+        '''
+        Compute the similar indices in the data and return a list of pairs
+        input: numpy array
+        output: list of pairs
+        '''
+        if not isinstance(data, np.ndarray):
+            raise TypeError('data should be a numpy array')
+
+        reduced_data = self.dimReducer.fit_transform(data)
+        return self._get_pairs(reduced_data)       

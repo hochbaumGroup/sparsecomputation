@@ -4,7 +4,7 @@ import sys
 import os
 from PCA import PCA
 # add source directory to path
-sys.path.append( os.path.abspath('..'))
+sys.path.append(os.path.abspath('..'))
 
 
 class TestPCA(unittest.TestCase):

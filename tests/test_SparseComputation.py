@@ -47,10 +47,10 @@ class TestPCA(unittest.TestCase):
                                              np.array([elt, elt, elt]))
 
     def test_get_pairs(self):
-        self.assertRaises(TypeError, self.b.get_sim_indices, [])
-        self.assertRaises(ValueError, self.b.get_sim_indices,
+        self.assertRaises(TypeError, self.b._get_pairs, [])
+        self.assertRaises(ValueError, self.b._get_pairs,
                           np.array([np.ones(6)]))
-        pairs = np.array(self.b.get_sim_indices(self.data))
+        pairs = np.array(self.b._get_pairs(self.data))
         expected_pairs = np.array([(0, 0), (0, 1), (0, 4), (1, 0), (1, 1),
                                   (1, 4), (4, 0), (4, 1), (4, 4), (0, 3),
                                   (1, 3), (4, 3), (3, 3), (3, 0), (3, 1),

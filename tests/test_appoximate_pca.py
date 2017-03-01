@@ -2,10 +2,8 @@ import unittest
 import sys
 import os
 import numpy as np
-from ApproximatePCA import ApproximatePCA
-from PCA import PCA
-# add source directory to path
-sys.path.append(os.path.abspath('..'))
+from SparseComputation import ApproximatePCA
+from SparseComputation import PCA
 
 
 class TestApproximatePCA(unittest.TestCase):

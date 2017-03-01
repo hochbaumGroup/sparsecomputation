@@ -1,6 +1,45 @@
-from DimReducer import DimReducer
 import numpy as np
 import sklearn.decomposition
+
+
+class DimReducer:
+
+    def __init__(self, dimLow=3):
+        self.dimLow = dimLow
+
+    def fit_transform(self, data):
+        pass
+
+
+class PCA (DimReducer):
+    def __init__(self, dimLow):
+        if not isinstance(dimLow, int):
+            raise TypeError('dimLow should be a positive integer')
+        if dimLow < 1:
+            raise ValueError('dimLow should be positive')
+        self.dimLow = dimLow
+
+    def fit_transform(self, data):
+        '''
+        Data is a numpy array containing your data.
+        Each row should be an observation and each column correspond to a
+        parameter.
+        fit_transform calls the PCA reduction of numpy library.
+        The output will contain exactly the same number of rows but only
+        dimLow columns.
+        PCA projects the matrix data in a space of dimLow dimension minimizing
+        the square error between the projection and the original vector.
+        input: numpy array
+        output: numpy array
+        '''
+        if not isinstance(data, np.ndarray):
+            raise TypeError('Data should be a Numpy array')
+        if len(data[0]) < self.dimLow:
+            raise ValueError('Data has less columns than dimLow')
+
+        pca = sklearn.decomposition.PCA(n_components=self.dimLow)
+        reducedData = pca.fit_transform(data)
+        return reducedData
 
 
 class ApproximatePCA(DimReducer):

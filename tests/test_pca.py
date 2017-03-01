@@ -2,9 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
-from PCA import PCA
-# add source directory to path
-sys.path.append(os.path.abspath('..'))
+from SparseComputation import PCA
 
 
 class TestPCA(unittest.TestCase):
@@ -14,6 +12,8 @@ class TestPCA(unittest.TestCase):
 
     def test_pca_init(self):
         self.assertEqual(self.p.dimLow, 3)
+        self.assertRaises(TypeError, PCA, 'a')
+        self.assertRaises(ValueError, PCA, -1)
 
     def test_input_exceptions(self):
         data = [[1, 2]]

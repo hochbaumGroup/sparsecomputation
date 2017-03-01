@@ -3,9 +3,7 @@ import unittest
 import sys
 import os
 from SparseComputation import SparseComputation
-from DimReducer import DimReducer
-# add source directory to path
-sys.path.append(os.path.abspath('..'))
+from SparseComputation import DimReducer
 
 
 class TestPCA(unittest.TestCase):

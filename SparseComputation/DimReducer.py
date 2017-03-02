@@ -98,8 +98,8 @@ class ApproximatePCA(DimReducer):
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
 
-        transposed_data = np.transpose(data.astype('float'))
-        result = sum(transposed_data**2)
+        data = data.astype(float)
+        result = np.sum(data**2, axis=1)
         result /= sum(result)
         return result
 
@@ -116,15 +116,9 @@ class ApproximatePCA(DimReducer):
         proba_col = self._get_proba_col(data)
         n = len(data[0])
         n_col = max(self.minCol, n*self.percCol / 100.0)
-        if n != len(proba_col):
-            raise TypeError
         list_col = np.random.choice(range(n), n_col, 0, proba_col)
-        result = []
-        transposed_data = np.transpose(data)
-        for idx in list_col:
-            result.append(np.copy(transposed_data[idx]))
-        result = np.array(result)
-        return np.transpose(result)
+        result = np.copy(data[:, list_col])
+        return result
 
     def _row_reduction(self, data):
         '''
@@ -138,14 +132,10 @@ class ApproximatePCA(DimReducer):
 
         proba_row = self._get_proba_row(data)
         n = len(data)
-        if n != len(proba_row):
-            raise TypeError
         n_row = max(self.minRow, n*self.percRow/100.0)
         list_rows = np.random.choice(range(0, n), n_row, 0, proba_row)
-        result = []
-        for idx in list_rows:
-            result.append(np.copy(data[idx]))
-        return np.array(result)
+        result = np.copy(data[list_rows, :])
+        return result
 
     def fit_transform(self, data):
         '''
@@ -158,8 +148,7 @@ class ApproximatePCA(DimReducer):
 
         col_reduced_data = self._col_reduction(data)
         reduced_data = self._row_reduction(col_reduced_data)
-        pca = sklearn.decomposition.PCA(n_components=self.dimLow,
-                                        svd_solver='full')
+        pca = sklearn.decomposition.PCA(n_components=self.dimLow)
         pca.fit(reduced_data)
         data = pca.transform(col_reduced_data)
         return data

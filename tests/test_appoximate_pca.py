@@ -36,8 +36,8 @@ class TestApproximatePCA(unittest.TestCase):
 
     def test_approx_pca_init(self):
         self.assertEqual(self.ap.dimLow, 3)
-        self.assertEqual(self.ap.percRow, 0.01)
-        self.assertEqual(self.ap.percCol, 1)
+        self.assertEqual(self.ap.fracRow, 0.01)
+        self.assertEqual(self.ap.fracCol, 1)
         self.assertEqual(self.ap.minRow, 100)
         self.assertEqual(self.ap.minCol, 150)
 

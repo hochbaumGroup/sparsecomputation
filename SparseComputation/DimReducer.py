@@ -44,20 +44,20 @@ class PCA (DimReducer):
 
 class ApproximatePCA(DimReducer):
 
-    def __init__(self, dimLow, percRow=0.01,
-                 percCol=1.0, minRow=150, minCol=150):
+    def __init__(self, dimLow, fracRow=0.01,
+                 fracCol=1.0, minRow=150, minCol=150):
         if not isinstance(dimLow, int):
             return TypeError('dim Low should be an integer')
         if dimLow < 1:
             return ValueError('dimLow should be positive')
-        if not (isinstance(percRow, float) or isinstance(percRow, int)):
-            return TypeError('percRow should be float')
-        if percRow <= 0 or percRow > 1:
-            return ValueError('percRow should be between 0 and 1')
-        if not (isinstance(percCol, float) or isinstance(percCol, int)):
-            return TypeError('percCol should be a float')
-        if percCol <= 0 or percCol > 1:
-            return ValueError('percCol should be between 0 and 1')
+        if not (isinstance(fracRow, float) or isinstance(fracRow, int)):
+            return TypeError('fracRow should be float')
+        if fracRow <= 0 or fracRow > 1:
+            return ValueError('fracRow should be between 0 and 1')
+        if not (isinstance(fracCol, float) or isinstance(fracCol, int)):
+            return TypeError('fracCol should be a float')
+        if fracCol <= 0 or fracCol > 1:
+            return ValueError('fracCol should be between 0 and 1')
         if not isinstance(minRow, int):
             return TypeError('minRow should be integer')
         if minRow <= 0:
@@ -68,8 +68,8 @@ class ApproximatePCA(DimReducer):
             return ValueError('minCol should be a positive integer')
 
         self.dimLow = dimLow
-        self.percRow = percRow
-        self.percCol = percCol
+        self.fracRow = fracRow
+        self.fracCol = fracCol
         self.minRow = minRow
         self.minCol = minCol
 
@@ -106,7 +106,7 @@ class ApproximatePCA(DimReducer):
     def _col_reduction(self, data):
         '''
         Compute the probability for each collumn and reduce the number of
-        collumns accordingly, keeping only minCol or percCol*#col
+        collumns accordingly, keeping only minCol or fracCol*#col
         input: numpy array
         output: numpy array
         '''
@@ -115,7 +115,7 @@ class ApproximatePCA(DimReducer):
 
         proba_col = self._get_proba_col(data)
         n = len(data[0])
-        n_col = max(self.minCol, n*self.percCol / 100.0)
+        n_col = max(self.minCol, n*self.fracCol / 100.0)
         list_col = np.random.choice(range(n), n_col, 0, proba_col)
         result = np.copy(data[:, list_col])
         return result
@@ -123,7 +123,7 @@ class ApproximatePCA(DimReducer):
     def _row_reduction(self, data):
         '''
         Compute the probability for each row and reduce the number of
-        rows accordingly, keeping only minRow or percRow*#col
+        rows accordingly, keeping only minRow or fracRow*#col
         input: numpy array
         output: numpy array
         '''
@@ -132,7 +132,7 @@ class ApproximatePCA(DimReducer):
 
         proba_row = self._get_proba_row(data)
         n = len(data)
-        n_row = max(self.minRow, n*self.percRow/100.0)
+        n_row = max(self.minRow, n*self.fracRow/100.0)
         list_rows = np.random.choice(range(0, n), n_row, 0, proba_row)
         result = np.copy(data[list_rows, :])
         return result

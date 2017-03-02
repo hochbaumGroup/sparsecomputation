@@ -41,12 +41,6 @@ class TestApproximatePCA(unittest.TestCase):
         self.assertEqual(self.ap.minRow, 100)
         self.assertEqual(self.ap.minCol, 150)
 
-    def test_Frobenius(self):
-        data = np.array([[1, 2], [3, 4]])
-        exp_result = 30.0
-        result = self.ap._get_Frobenius(data)
-        self.assertEqual(exp_result, result)
-
     def test_proba_col(self):
         data = np.array([[1, 2], [3, 4]])
         exp_result = np.array([10.0/30, 20.0/30])

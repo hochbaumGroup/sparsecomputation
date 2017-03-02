@@ -45,19 +45,19 @@ class PCA (DimReducer):
 class ApproximatePCA(DimReducer):
 
     def __init__(self, dimLow, percRow=0.01,
-                 percCol=1, minRow=150, minCol=150):
+                 percCol=1.0, minRow=150, minCol=150):
         if not isinstance(dimLow, int):
             return TypeError('dim Low should be an integer')
-        if dimLow > 3 or dimLow < 2:
-            return ValueError('dimLow should be 2 or 3')
+        if dimLow < 1:
+            return ValueError('dimLow should be positive')
         if not (isinstance(percRow, float) or isinstance(percRow, int)):
-            return TypeError('percRow should be float or integer')
-        if percRow <= 0 or percRow > 100:
-            return ValueError('percRow should be between 0 and 100')
+            return TypeError('percRow should be float')
+        if percRow <= 0 or percRow > 1:
+            return ValueError('percRow should be between 0 and 1')
         if not (isinstance(percCol, float) or isinstance(percCol, int)):
-            return TypeError('percCol should be a float or an integer')
-        if percCol <= 0 or percCol > 100:
-            return ValueError('percCol should be between 0 and 100')
+            return TypeError('percCol should be a float')
+        if percCol <= 0 or percCol > 1:
+            return ValueError('percCol should be between 0 and 1')
         if not isinstance(minRow, int):
             return TypeError('minRow should be integer')
         if minRow <= 0:
@@ -73,20 +73,6 @@ class ApproximatePCA(DimReducer):
         self.minRow = minRow
         self.minCol = minCol
 
-    def _get_Frobenius(self, data):
-        '''
-        return the Froebenius norm of the matrix data
-        input: numpy array
-        output: float
-        '''
-        if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
-
-        result = 0
-        for vec in data:
-            result += float(sum(vec**2))
-        return result
-
     def _get_proba_col(self, data):
         '''
         returns a Numpy array of the probability to chose each collumn of data
@@ -97,12 +83,10 @@ class ApproximatePCA(DimReducer):
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
 
-        Frobenius = self._get_Frobenius(data)
-        transposed_data = np.transpose(data)
-        proba_col = []
-        for col in transposed_data:
-            proba_col.append(sum(col**2)/Frobenius)
-        return np.array(proba_col)
+        data = (data.astype(float))
+        result = sum(data ** 2)
+        result /= sum(result)
+        return result
 
     def _get_proba_row(self, data):
         '''
@@ -114,11 +98,10 @@ class ApproximatePCA(DimReducer):
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
 
-        Frobenius = self._get_Frobenius(data)
-        proba_row = []
-        for row in data:
-            proba_row.append(sum(row**2)/Frobenius)
-        return np.array(proba_row)
+        transposed_data = np.transpose(data.astype('float'))
+        result = sum(transposed_data**2)
+        result /= sum(result)
+        return result
 
     def _col_reduction(self, data):
         '''

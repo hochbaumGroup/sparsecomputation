@@ -15,7 +15,7 @@ class TestPCA(unittest.TestCase):
         self.assertRaises(TypeError, PCA, 'a')
         self.assertRaises(ValueError, PCA, -1)
 
-    def test_input_exceptions(self):
+    def test_input_exceptions_fit_transform(self):
         data = [[1, 2]]
         self.assertRaises(TypeError, self.p.fit_transform, data)
         data = np.array(data)

@@ -158,7 +158,7 @@ class SparseComputation:
                         pairs.append(j)
         return pairs
 
-    def get_similar_indices(slef, data):
+    def get_similar_indices(self, data):
         '''
         Compute the similar indices in the data and return a list of pairs
         input: numpy array
@@ -168,4 +168,4 @@ class SparseComputation:
             raise TypeError('data should be a numpy array')
 
         reduced_data = self.dimReducer.fit_transform(data)
-        return self._get_pairs(reduced_data)       
+        return self._get_pairs(reduced_data)

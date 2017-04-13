@@ -13,6 +13,21 @@ class DimReducer:
 
 class PCA (DimReducer):
     def __init__(self, dimLow):
+        ''' `PCA` is a class of `DimReducer`
+
+        `PCA` is a statistical procedure that uses an orthogonal transformation
+        to convert a set of observations of possibly correlated variables into
+        a set of values of linearly uncorrelated variables called principal
+        components.
+        This class has a method fit_transform to call with the data to project
+        as input.
+
+        Args:
+            param1 (int): `dimLow` dimension of the low dimensional space
+                          should be smaller than the number of colums of the
+                          input data
+        '''
+
         if not isinstance(dimLow, int):
             raise TypeError('dimLow should be a positive integer')
         if dimLow < 1:
@@ -20,18 +35,26 @@ class PCA (DimReducer):
         self.dimLow = dimLow
 
     def fit_transform(self, data):
+        '''`fit_transform` projects the input data on a lower dimensional space
+        of dimension `dimLow`
+
+        `fit_transform` reduces the number of columns of the input data to
+        dimLow using an orthogonal transformation
+        to convert a set of observations of possibly correlated variables into
+        a set of values of linearly uncorrelated variables called principal
+        components.
+        This method calls the library Numpy
+
+        Args:
+            param1 (numpy.ndarray): input data that needs to be reduced.
+                                    data should be a table of n lines being n
+                                    observations, each line having p features.
+
+        Returns:
+            numpy.ndarray: reduced data, a table of n lines and `dimLow`
+                           columns
         '''
-        Data is a numpy array containing your data.
-        Each row should be an observation and each column correspond to a
-        parameter.
-        fit_transform calls the PCA reduction of numpy library.
-        The output will contain exactly the same number of rows but only
-        dimLow columns.
-        PCA projects the matrix data in a space of dimLow dimension minimizing
-        the square error between the projection and the original vector.
-        input: numpy array
-        output: numpy array
-        '''
+
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
         if len(data[0]) < self.dimLow:

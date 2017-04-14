@@ -5,6 +5,26 @@ import itertools
 class SparseComputation:
 
     def __init__(self, dimReducer, gridResolution=25):
+        '''`SparseComputation` is an object provided with a `DimReducer`
+        object and a `get_similar_indices` method that returns the highly
+        similar pairs
+
+        The sparse computation method works by first projecting the
+        (high-dimensional) data set onto a low-dimensional space using a
+        `DimReducer`. Then grid blocks are created and we use grid neighborhood
+        to select the pairs that are deemed to be highly similar.
+
+        Args:
+            dimReducer (DimReducer): object of the class `DimReducer` provided
+                                     with a `fit_transform` method to project
+                                     the data on a smaller dimensional space
+                                     before the similar pairs are computed
+            gridResolution (int): number of gridblock per axis. For instance,
+                                  a `DimReducer` provided with a `dimLow` of 3
+                                  and a `SparseComputation` provided with a
+                                  `gridResolution` of 4 will build 4^3=64
+                                  grid blocks
+        '''
         if not isinstance(gridResolution, int):
             raise TypeError('gridResolution should be a positive integer')
         if gridResolution < 1:
@@ -159,10 +179,22 @@ class SparseComputation:
         return pairs
 
     def get_similar_indices(self, data):
-        '''
-        Compute the similar indices in the data and return a list of pairs
-        input: numpy array
-        output: list of pairs
+        '''`get_similar_indices` computes the similar indices in the data and
+        return a list of pairs
+
+        `get_similar_indices` first projects the (high-dimensional) data set
+        onto a low-dimensional space using the `DimReducer`. Then grid blocks
+        are created and we use grid neighborhood to select the pairs that are
+        deemed to be highly similar.
+
+        Args:
+            data (numpy.ndarray): input data that needs to be spasified
+                                  data should be a table of n lines being n
+                                  observations, each line having p features.
+        Returns:
+            (list [(int, int)]): list of directed pairs. This mean that if `i`
+                                 is similar to `j` both pairs `(i, j)` and
+                                 `(j, i)` are returned in the list
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')

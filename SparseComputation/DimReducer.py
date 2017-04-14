@@ -23,7 +23,7 @@ class PCA (DimReducer):
         as input.
 
         Args:
-            param1 (int): `dimLow` dimension of the low dimensional space
+            dimLow (int): dimension of the low dimensional space
                           should be smaller than the number of colums of the
                           input data
         '''
@@ -46,9 +46,9 @@ class PCA (DimReducer):
         This method calls the library Numpy
 
         Args:
-            param1 (numpy.ndarray): input data that needs to be reduced.
-                                    data should be a table of n lines being n
-                                    observations, each line having p features.
+            data (numpy.ndarray): input data that needs to be reduced.
+                                  data should be a table of n lines being n
+                                  observations, each line having p features.
 
         Returns:
             numpy.ndarray: reduced data, a table of n lines and `dimLow`
@@ -69,6 +69,26 @@ class ApproximatePCA(DimReducer):
 
     def __init__(self, dimLow, fracRow=0.01,
                  fracCol=1.0, minRow=150, minCol=150):
+        '''`ApproximatePCA` is a class of DimReducer
+
+        ApproximatePCA is a randomized version of PCA. The first step is to
+        randomly select rows and columns of the input matrix with probability
+        proportionnal to their relative weight. Then to run the traditional
+        principal component analysis. This method provides leading principal
+        components very similar to exact PCA, but requires significantly less
+        running time.
+
+        Args:
+            dimLow (int): dimension of the low dimensional space
+                          should be smaller than the number of colums of the
+                          input data
+            fracRow (float<1): fraction of the number of rows to be used to
+                               fit the data.
+            fracCol (float<1): fraction of the number of columns to be used to
+                               fit the data.
+            minRow (int): minimum number of columns to be used to fit the data
+            minCol (int): minimum number of rows to be used to fit the data
+        '''
         if not isinstance(dimLow, int):
             return TypeError('dim Low should be an integer')
         if dimLow < 1:
@@ -161,10 +181,24 @@ class ApproximatePCA(DimReducer):
         return result
 
     def fit_transform(self, data):
-        '''
-        Apply approximate PCA to data and return the reduced data
-        input: numpy array
-        output: numpy array
+        '''`fit_transform` projects the input data on a lower dimensional space
+        of dimension `dimLow`
+
+        `fit_transform` reduces the number of columns of the input data to
+        dimLow using an orthogonal transformation on a random subset of rows
+        and columns to convert a set of observations of possibly correlated
+        variables into a set of values of linearly uncorrelated variables
+        called principal components.
+        This method calls the library Numpy.
+
+        Args:
+            data (numpy.ndarray): input data that needs to be reduced.
+                                  data should be a table of n lines being n
+                                  observations, each line having p features.
+
+        Returns:
+            numpy.ndarray: reduced data, a table of n lines and `dimLow`
+                           columns
         '''
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')

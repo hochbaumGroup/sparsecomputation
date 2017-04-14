@@ -4,7 +4,7 @@ SparseComputation is a python package to construct a sparse similarity matrix fr
 
 The purpose is to overcome thecomputational burden of computing all pairwise similarities between the data points by generating only the relevant similarities. Once the relevant pairs of objects have been identified, their similarities can be computed in the original space.
 
-The input of data must be a numpy array of n observations, each observations presenting p features. The sparse computation method works by first projecting the (high-dimensional) data set onto a low-dimensional space. In the low-dimensional space using a `DimReducer`. Then grid blocks are created and we use grid neighborhood to select the pairs that are deemed to be highly similar.
+The input of data must be a numpy array of n observations, each observations presenting p features. The sparse computation method works by first projecting the (high-dimensional) data set onto a low-dimensional space using a `DimReducer`. Then grid blocks are created and we use grid neighborhood to select the pairs that are deemed to be highly similar.
 
 ## DimReducer
 

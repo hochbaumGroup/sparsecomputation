@@ -149,19 +149,16 @@ class SparseComputation:
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
         for box_id in boxes_dict:
-            for j in itertools.product(boxes_dict[box_id], boxes_dict[box_id]):
-                pairs.append(j)
-            for i in range(0, n):
-                id_plus = box_id + self.gridResolution**i
-                id_minus = box_id - self.gridResolution**i
-                if id_plus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id],
-                                               boxes_dict[id_plus]):
-                        pairs.append(j)
-                if id_minus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id],
-                                               boxes_dict[id_minus]):
-                        pairs.append(j)
+            for increment in itertools.product(range(-1, 2), repeat=n):
+                id_incremented = box_id
+                for i in range(n):
+                    id_incremented += increment[i]*self.gridResolution**i
+                if id_incremented in boxes_dict:
+                    pairs_list = itertools.product(boxes_dict[box_id],
+                                                   boxes_dict[id_incremented])
+                    for (a, b) in pairs_list:
+                        if a < b and not ((a, b) in pairs):
+                            pairs.append((a, b))
         return pairs
 
     def get_similar_indices(self, data):

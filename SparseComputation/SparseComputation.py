@@ -81,16 +81,17 @@ class SparseComputation:
         minimum = self._get_min(data)
         coef = []
         rescaled_data = []
-        for i in range(0, n):
+        for i in range(n):
             try:
-                toAppend = float(self.gridResolution-1)/(maximum[i]-minimum[i])
+                toAppend = float(self.gridResolution)/(maximum[i]-minimum[i])
                 coef.append(toAppend)
             except ZeroDivisionError:
                 coef.append(0)
         for vec in data:
             rescaled_vec = []
-            for i in range(0, n):
-                rescaled_vec.append(int((vec[i]-minimum[i])*coef[i]))
+            for i in range(n):
+                rescaled_vec.append(min(int((vec[i]-minimum[i])*coef[i]),
+                                        self.gridResolution-1))
             rescaled_data.append(rescaled_vec)
         return np.array(rescaled_data)
 

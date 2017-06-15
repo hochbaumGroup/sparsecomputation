@@ -126,7 +126,7 @@ class SparseComputation:
         n = len(data[0])
         result = {}
         for i in range(0, len(data)):
-            box_id = self._index_to_boxe_id(data[i])
+            box_id = tuple(data[i])
             if not (box_id in result):
                 result[box_id] = []
             result[box_id].append(i)
@@ -150,10 +150,10 @@ class SparseComputation:
         pairs = []
         for box_id in boxes_dict:
             for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = box_id
+                id_incremented = np.array(box_id)
                 for i in range(n):
-                    id_incremented += increment[i]*self.gridResolution**i
-                if id_incremented in boxes_dict:
+                    id_incremented += np.array(increment)
+                if tuple(id_incremented) in boxes_dict:
                     pairs_list = itertools.product(boxes_dict[box_id],
                                                    boxes_dict[id_incremented])
                     for (a, b) in pairs_list:

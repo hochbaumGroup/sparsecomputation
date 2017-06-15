@@ -141,8 +141,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError
-        if len(data[0]) > 3:
-            raise ValueError
 
         n = len(data[0])
         rescaled_data = self._rescale_data(data)

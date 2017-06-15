@@ -10,7 +10,7 @@ class TestApproximatePCA(unittest.TestCase):
 
     def setUp(self):
         self.ap = ApproximatePCA(3, 0.01, 1, 100, 150)
-        self.small_ap = ApproximatePCA(2, 0.01, 1, 2, 3)
+        self.small_ap = ApproximatePCA(2, 0.01, 0.01, 2, 3)
         data = []
         for i in range(5):
             elt = []
@@ -61,7 +61,7 @@ class TestApproximatePCA(unittest.TestCase):
 
     def test_col_reduction(self):
         np.random.seed(self._seed)
-        result = np.array(self.small_ap._col_reduction(self._data))
+        result = self.small_ap._col_reduction(self._data)
         exp_result = self._col_reduced_data
         np.testing.assert_array_almost_equal(exp_result, result)
 

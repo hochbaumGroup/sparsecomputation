@@ -41,9 +41,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         minimum = np.copy(data[0])
@@ -61,9 +58,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         maximum = np.copy(data[0])
@@ -81,9 +75,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         maximum = self._get_max(data)
@@ -113,9 +104,6 @@ class SparseComputation:
         if not isinstance(array, np.ndarray):
             raise TypeError('The coordinates of the box' +
                             'should be a Numpy array')
-        if len(array) > 3:
-            raise ValueError('The coordinates of a box should have at most' +
-                             'three components')
         if not isinstance(array[0], int):
             raise TypeError('The coordinates of the box should be integer')
 
@@ -133,9 +121,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         result = {}

@@ -109,7 +109,7 @@ class SparseComputation:
             raise TypeError('The coordinates of the box should be integer')
 
         result = 0
-        for i in range(0, len(array)):
+        for i in range(len(array)):
             result += array[i]*self.gridResolution**i
         return result
 
@@ -147,15 +147,16 @@ class SparseComputation:
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
         for box_id in boxes_dict:
+            grid_res_basis_id = self._index_to_boxe_id(np.array(box_id))
             for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = np.array(box_id)
-                for i in range(n):
-                    id_incremented += np.array(increment)
+                id_incremented = np.array(box_id)+np.array(increment)
+                grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
+                '''if grid_res_basis_id <= grid_res_basis_id_incremented:'''
                 if tuple(id_incremented) in boxes_dict:
                     pairs_list = itertools.product(boxes_dict[box_id],
-                                                   boxes_dict[id_incremented])
+                                                   boxes_dict[tuple(id_incremented)])
                     for (a, b) in pairs_list:
-                        if a < b and not ((a, b) in pairs):
+                        if a < b and not (a, b) in pairs:
                             pairs.append((a, b))
         return pairs
 

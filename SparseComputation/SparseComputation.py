@@ -77,8 +77,8 @@ class SparseComputation:
             raise TypeError('Data should be a Numpy array')
 
         n = len(data[0])
-        maximum = self._get_max(data)
-        minimum = self._get_min(data)
+        maximum = np.amax(data, axis=0)
+        minimum = np.amin(data, axis=0)
         coef = []
         rescaled_data = []
         for i in range(n):

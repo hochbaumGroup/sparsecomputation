@@ -46,9 +46,7 @@ class TestPCA(unittest.TestCase):
 
     def test_get_pairs(self):
         self.assertRaises(TypeError, self.b._get_pairs, [])
-        print  self.b._rescale_data(self.data)
         pairs = np.array(self.b._get_pairs(self.data))
-        print pairs
         expected_pairs = np.array([(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
                                   (4, 1), (4, 3), (4, 2), (3, 1), (3, 2)])
         np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)

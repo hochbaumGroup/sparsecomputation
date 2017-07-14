@@ -20,22 +20,12 @@ class TestPCA(unittest.TestCase):
         self.assertRaises(TypeError, SparseComputation, self.dimReducer, '1')
         self.assertRaises(ValueError, SparseComputation, self.dimReducer, 0)
 
-    def test_get_min(self):
-        self.assertRaises(TypeError, self.b._get_min, [])
-        minimum = np.array(self.b._get_min(self.data))
-        np.testing.assert_array_almost_equal(minimum, np.array([1, 0, -1]))
-
-    def test_get_max(self):
-        self.assertRaises(TypeError, self.b._get_max, [])
-        maximum = np.array(self.b._get_max(self.data))
-        np.testing.assert_array_almost_equal(maximum, np.array([10, 8, 9]))
-
     def test_rescale(self):
         self.assertRaises(TypeError, self.b._rescale_data, [])
         rescaled_data = self.b._rescale_data(self.data)
-        minimum = np.array(self.b._get_min(rescaled_data))
+        minimum = np.array(np.amin(rescaled_data, axis=0))
         np.testing.assert_array_almost_equal(minimum, np.zeros(3), decimal=6)
-        maximum = np.array(self.b._get_max(rescaled_data))
+        maximum = np.array(np.amax(rescaled_data, axis=0))
         elt = self.gridResolution - 1
         np.testing.assert_array_almost_equal(maximum,
                                              np.array([elt, elt, elt]))

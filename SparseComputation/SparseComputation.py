@@ -33,40 +33,6 @@ class SparseComputation:
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
 
-    def _get_min(self, data):
-        '''
-        take the data and return the minimum for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-
-        n = len(data[0])
-        minimum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] < minimum[i]:
-                    minimum[i] = vec[i]
-        return minimum
-
-    def _get_max(self, data):
-        '''
-        take the data and return the max for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-
-        n = len(data[0])
-        maximum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] > maximum[i]:
-                    maximum[i] = vec[i]
-        return maximum
-
     def _rescale_data(self, data):
         '''
         Rescale the data from 0 to gridResolution-1

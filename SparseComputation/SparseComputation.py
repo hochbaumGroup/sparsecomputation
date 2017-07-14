@@ -151,13 +151,15 @@ class SparseComputation:
             for increment in itertools.product(range(-1, 2), repeat=n):
                 id_incremented = np.array(box_id)+np.array(increment)
                 grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
-                '''if grid_res_basis_id <= grid_res_basis_id_incremented:'''
-                if tuple(id_incremented) in boxes_dict:
-                    pairs_list = itertools.product(boxes_dict[box_id],
-                                                   boxes_dict[tuple(id_incremented)])
-                    for (a, b) in pairs_list:
-                        if a < b and not (a, b) in pairs:
-                            pairs.append((a, b))
+                if grid_res_basis_id == grid_res_basis_id_incremented:
+                    for i in range(len(boxes_dict[box_id])):
+                        for j in range(i+1, len(boxes_dict[box_id])):
+                            pairs.append(boxes_dict[box_id][i],boxes_dict[box_id][j])
+                if grid_res_basis_id < grid_res_basis_id_incremented:
+                    if tuple(id_incremented) in boxes_dict:
+                        for a in boxes_dict[box_id]:
+                            for b in boxes_dict[tuple(id_incremented)]:
+                                pairs.append((a, b))
         return pairs
 
     def get_similar_indices(self, data):

@@ -108,7 +108,7 @@ class SparseComputation:
         for box_id in boxes_dict:
             grid_res_basis_id = self._index_to_box_id(box_id)
             for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = np.array(box_id)+np.array(increment)
+                id_incremented = (a + b for a, b in zip(box_id, increment))
                 grid_res_basis_id_incremented = self._index_to_box_id(id_incremented)
                 if grid_res_basis_id == grid_res_basis_id_incremented:
                     for i in range(len(boxes_dict[box_id])):
@@ -116,9 +116,9 @@ class SparseComputation:
                             pairs.append((boxes_dict[box_id][i],
                                          boxes_dict[box_id][j]))
                 if grid_res_basis_id < grid_res_basis_id_incremented:
-                    if tuple(id_incremented) in boxes_dict:
+                    if id_incremented in boxes_dict:
                         for a in boxes_dict[box_id]:
-                            for b in boxes_dict[tuple(id_incremented)]:
+                            for b in boxes_dict[id_incremented]:
                                 pairs.append((a, b))
         return pairs
 

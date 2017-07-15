@@ -3,10 +3,10 @@ import unittest
 import sys
 import os
 from SparseComputation import SparseComputation
-from SparseComputation import DimReducer
+from SparseComputation.DimReducer import DimReducer
 
 
-class TestPCA(unittest.TestCase):
+class TestSparseComputation(unittest.TestCase):
 
     def setUp(self):
         self.gridResolution = 2

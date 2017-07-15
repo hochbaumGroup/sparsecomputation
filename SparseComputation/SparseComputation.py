@@ -153,14 +153,20 @@ class SparseComputation:
 
 class SparseShiftedComputation (SparseComputation):
     
+    def _getNumberOfShiftedGrids(self,data):
+        p = len(data[0])
+        return 2**p
+    
+    def _getOffsets(self,nGrid,p):
+        offsets = []
+        for i in range(nGrid):
+            offsets.append(bin(i))
+        return offsets
+    
     def get_similar_indices(self, data): 
         
-        # get low-dimensional projection
         reduced_data = self.dimReducer.fit_transform(data)
-        
-        # get number of required grids
-        p = len(data[0])
-        nGrids = 2**p
+        nGrids = self._getNumberOfShiftedGrids(reduced_data)
         
         # compute offset for each grid
         #offsets = dec2bin((0:2^d-1)) - '0';

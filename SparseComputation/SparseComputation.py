@@ -118,8 +118,8 @@ class SparseComputation:
                 if grid_res_basis_id == grid_res_basis_id_incremented:
                     for i in range(len(boxes_dict[box_id])):
                         for j in range(i+1, len(boxes_dict[box_id])):
-                            pairs.append(boxes_dict[box_id][i],
-                                         boxes_dict[box_id][j])
+                            pairs.append((boxes_dict[box_id][i],
+                                         boxes_dict[box_id][j]))
                 if grid_res_basis_id < grid_res_basis_id_incremented:
                     if tuple(id_incremented) in boxes_dict:
                         for a in boxes_dict[box_id]:

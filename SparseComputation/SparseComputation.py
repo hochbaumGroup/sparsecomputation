@@ -183,3 +183,23 @@ class SparseComputation:
 
         reduced_data = self.dimReducer.fit_transform(data)
         return self._get_pairs(reduced_data)
+
+class SparseShiftedComputation (SparseComputation):
+    
+    def get_similar_indices(self, data): 
+        
+        # get low-dimensional projection
+        reduced_data = self.dimReducer.fit_transform(data)
+        
+        # get number of required grids
+        p = len(data[0])
+        nGrids = 2**p
+        
+        # compute offset for each grid
+        #offsets = dec2bin((0:2^d-1)) - '0';
+        #grids = constructGrids(reduced_data,offsets,self.gridResolution)       
+    
+    
+    
+    
+    

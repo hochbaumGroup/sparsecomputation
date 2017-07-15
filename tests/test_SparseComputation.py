@@ -40,3 +40,8 @@ class TestSparseComputation(unittest.TestCase):
         expected_pairs = np.array([(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
                                   (4, 1), (4, 3), (4, 2), (3, 1), (3, 2)])
         np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)
+
+    def test_get_pairs_same_box(self):
+        pairs = np.array(self.b._get_pairs(np.array([[0, 0], [0, 0]])))
+        expected_pairs = np.array([(0, 1)])
+        np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)

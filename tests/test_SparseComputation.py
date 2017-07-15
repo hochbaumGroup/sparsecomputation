@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import sys
 import os
-from SparseComputation import SparseComputation
+from SparseComputation import SparseComputation, SparseShiftedComputation
 from SparseComputation.DimReducer import DimReducer
 
 
@@ -40,3 +40,18 @@ class TestSparseComputation(unittest.TestCase):
         expected_pairs = np.array([(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
                                   (4, 1), (4, 3), (4, 2), (3, 1), (3, 2)])
         np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)
+
+class TestSparseShiftedComputation(unittest.TestCase):
+    
+    def setUp(self):
+        self.gridResolution = 3
+        self.dimReducer = DimReducer(2)
+        self.b = SparseShiftedComputation(self.dimReducer, self.gridResolution)
+        self.data = np.array([[-1, -5], [-0.5,-4.5], [-0.5, -3.5], [0,-3], 
+                              [-0.5,-2.5], [1.5,-4.5], [1.5,-2.5], [2,-2]])
+    def test_ssc_init(self):
+        self.assertEqual(self.b.gridResolution, self.gridResolution)
+        self.assertRaises(TypeError, SparseShiftedComputation, 
+                          self.dimReducer, '1')
+        self.assertRaises(ValueError, SparseShiftedComputation, 
+                          self.dimReducer, 0)

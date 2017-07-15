@@ -61,21 +61,16 @@ class SparseComputation:
             rescaled_data.append(rescaled_vec)
         return np.array(rescaled_data)
 
-    def _index_to_boxe_id(self, array):
+    def _index_to_box_id(self, indices):
         '''
         Takes the coordinates of a box as input, retunr the id of this box in
         the dictionary
         input: numpy array
         output: int
         '''
-        if not isinstance(array, np.ndarray):
-            raise TypeError('The coordinates of the box' +
-                            'should be a Numpy array')
 
-        result = 0
-        for i in range(len(array)):
-            result += array[i]*self.gridResolution**i
-        return result
+        return (idx * self.gridResolution ** i
+                for i, idx in enumerate(indices))
 
     def _get_boxes(self, data):
         '''
@@ -111,10 +106,10 @@ class SparseComputation:
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
         for box_id in boxes_dict:
-            grid_res_basis_id = self._index_to_boxe_id(np.array(box_id))
+            grid_res_basis_id = self._index_to_box_id(box_id)
             for increment in itertools.product(range(-1, 2), repeat=n):
                 id_incremented = np.array(box_id)+np.array(increment)
-                grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
+                grid_res_basis_id_incremented = self._index_to_box_id(id_incremented)
                 if grid_res_basis_id == grid_res_basis_id_incremented:
                     for i in range(len(boxes_dict[box_id])):
                         for j in range(i+1, len(boxes_dict[box_id])):

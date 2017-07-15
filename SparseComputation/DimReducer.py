@@ -159,8 +159,10 @@ class ApproximatePCA(DimReducer):
         proba_col = self._get_proba_col(data)
         n = len(data[0])
         n_col = max(self.minCol, n*self.fracCol)
+        n_col = int(min(n_col, len(data[0])))
         list_col = np.random.choice(range(n), n_col, 0, proba_col)
-        result = np.copy(data[:, list_col])
+        factor = np.sqrt(np.array(proba_col)[list_col]*n_col)
+        result = np.copy(data[:, list_col])/factor
         return result
 
     def _row_reduction(self, data):
@@ -176,6 +178,7 @@ class ApproximatePCA(DimReducer):
         proba_row = self._get_proba_row(data)
         n = len(data)
         n_row = max(self.minRow, n*self.fracRow)
+        n_row = int(min(n_row, len(data)))
         list_rows = np.random.choice(range(0, n), n_row, 0, proba_row)
         result = np.copy(data[list_rows, :])
         return result

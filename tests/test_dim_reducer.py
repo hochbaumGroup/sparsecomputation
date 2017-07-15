@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 import numpy as np
-from SparseComputation import DimReducer
+from SparseComputation.DimReducer import DimReducer
 
 
 class TestDimReducer(unittest.TestCase):

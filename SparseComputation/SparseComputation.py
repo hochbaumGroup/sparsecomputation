@@ -33,46 +33,6 @@ class SparseComputation:
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
 
-    def _get_min(self, data):
-        '''
-        take the data and return the minimum for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
-
-        n = len(data[0])
-        minimum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] < minimum[i]:
-                    minimum[i] = vec[i]
-        return minimum
-
-    def _get_max(self, data):
-        '''
-        take the data and return the max for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
-
-        n = len(data[0])
-        maximum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] > maximum[i]:
-                    maximum[i] = vec[i]
-        return maximum
-
     def _rescale_data(self, data):
         '''
         Rescale the data from 0 to gridResolution-1
@@ -81,25 +41,23 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
-        maximum = self._get_max(data)
-        minimum = self._get_min(data)
+        maximum = np.amax(data, axis=0)
+        minimum = np.amin(data, axis=0)
         coef = []
         rescaled_data = []
-        for i in range(0, n):
+        for i in range(n):
             try:
-                toAppend = float(self.gridResolution-1)/(maximum[i]-minimum[i])
+                toAppend = float(self.gridResolution)/(maximum[i]-minimum[i])
                 coef.append(toAppend)
             except ZeroDivisionError:
                 coef.append(0)
         for vec in data:
             rescaled_vec = []
-            for i in range(0, n):
-                rescaled_vec.append(int((vec[i]-minimum[i])*coef[i]))
+            for i in range(n):
+                rescaled_vec.append(min(int((vec[i]-minimum[i])*coef[i]),
+                                        self.gridResolution-1))
             rescaled_data.append(rescaled_vec)
         return np.array(rescaled_data)
 
@@ -113,14 +71,9 @@ class SparseComputation:
         if not isinstance(array, np.ndarray):
             raise TypeError('The coordinates of the box' +
                             'should be a Numpy array')
-        if len(array) > 3:
-            raise ValueError('The coordinates of a box should have at most' +
-                             'three components')
-        if not isinstance(array[0], int):
-            raise TypeError('The coordinates of the box should be integer')
 
         result = 0
-        for i in range(0, len(array)):
+        for i in range(len(array)):
             result += array[i]*self.gridResolution**i
         return result
 
@@ -133,14 +86,11 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
-        if len(data[0]) > 3:
-            raise ValueError('Data should have at most three collumns, make' +
-                             'sure the DimReducer has been ran')
 
         n = len(data[0])
         result = {}
         for i in range(0, len(data)):
-            box_id = self._index_to_boxe_id(data[i])
+            box_id = tuple(data[i])
             if not (box_id in result):
                 result[box_id] = []
             result[box_id].append(i)
@@ -155,27 +105,26 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError
-        if len(data[0]) > 3:
-            raise ValueError
 
         n = len(data[0])
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
         for box_id in boxes_dict:
-            for j in itertools.product(boxes_dict[box_id], boxes_dict[box_id]):
-                pairs.append(j)
-            for i in range(0, n):
-                id_plus = box_id + self.gridResolution**i
-                id_minus = box_id - self.gridResolution**i
-                if id_plus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id],
-                                               boxes_dict[id_plus]):
-                        pairs.append(j)
-                if id_minus in boxes_dict:
-                    for j in itertools.product(boxes_dict[box_id],
-                                               boxes_dict[id_minus]):
-                        pairs.append(j)
+            grid_res_basis_id = self._index_to_boxe_id(np.array(box_id))
+            for increment in itertools.product(range(-1, 2), repeat=n):
+                id_incremented = np.array(box_id)+np.array(increment)
+                grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
+                if grid_res_basis_id == grid_res_basis_id_incremented:
+                    for i in range(len(boxes_dict[box_id])):
+                        for j in range(i+1, len(boxes_dict[box_id])):
+                            pairs.append(boxes_dict[box_id][i],
+                                         boxes_dict[box_id][j])
+                if grid_res_basis_id < grid_res_basis_id_incremented:
+                    if tuple(id_incremented) in boxes_dict:
+                        for a in boxes_dict[box_id]:
+                            for b in boxes_dict[tuple(id_incremented)]:
+                                pairs.append((a, b))
         return pairs
 
     def get_similar_indices(self, data):

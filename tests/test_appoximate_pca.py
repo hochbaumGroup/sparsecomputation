@@ -24,15 +24,17 @@ class TestApproximatePCA(unittest.TestCase):
         self._col_proba = np.array([0.15475113, 0.17556561, 0.19819005,
                                    0.22262443, 0.24886878])
         self._seed = 10
+        factor = np.sqrt(self._col_proba[[4, 0, 3]]*3.0)
         self._col_reduced_data = np.array([[5,  1,  4], [10,  6,  9],
                                           [15, 11, 14], [20, 16, 19],
-                                          [25, 21, 24]])
+                                          [25, 21, 24]])/factor
+
         self._row_reduced_data = np.array([[25, 21, 24], [20, 16, 19]])
-        self._pca = np.array([[3.03108891e+01, 3.55271368e-15],
-                              [2.16506351e+01, 2.66453526e-15],
-                              [1.29903811e+01, 1.77635684e-15],
-                              [4.33012702e+00, 2.22044605e-16],
-                              [-4.33012702e+00, -2.22044605e-16]])
+        self._pca = np.array([[-3.90947024e+01,   2.66453526e-15],
+                              [-2.79247874e+01,   2.66453526e-15],
+                              [-1.67548724e+01,   3.55271368e-15],
+                              [-5.58495748e+00,   1.55431223e-15],
+                              [ 5.58495748e+00,   1.11022302e-15]])
 
     def test_approx_pca_init(self):
         self.assertEqual(self.ap.dimLow, 3)
@@ -67,7 +69,10 @@ class TestApproximatePCA(unittest.TestCase):
 
     def test_row_reduction(self):
         np.random.seed(self._seed)
-        data = np.array(self.small_ap._col_reduction(self._data))
+        rand_select = self.small_ap._col_reduction(self._data)
+        data = np.array([[5,  1,  4], [10,  6,  9],
+                         [15, 11, 14], [20, 16, 19],
+                         [25, 21, 24]])
         result = np.array(self.small_ap._row_reduction(data))
         exp_result = self._row_reduced_data
         np.testing.assert_array_almost_equal(exp_result, result)

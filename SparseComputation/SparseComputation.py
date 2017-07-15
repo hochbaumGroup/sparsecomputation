@@ -33,40 +33,6 @@ class SparseComputation:
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
 
-    def _get_min(self, data):
-        '''
-        take the data and return the minimum for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-
-        n = len(data[0])
-        minimum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] < minimum[i]:
-                    minimum[i] = vec[i]
-        return minimum
-
-    def _get_max(self, data):
-        '''
-        take the data and return the max for each dimension in a list
-        input: numpy array
-        output: list of length dimLow
-        '''
-        if not isinstance(data, np.ndarray):
-            raise TypeError('Data should be a Numpy array')
-
-        n = len(data[0])
-        maximum = np.copy(data[0])
-        for vec in data:
-            for i in range(0, n):
-                if vec[i] > maximum[i]:
-                    maximum[i] = vec[i]
-        return maximum
-
     def _rescale_data(self, data):
         '''
         Rescale the data from 0 to gridResolution-1
@@ -77,8 +43,8 @@ class SparseComputation:
             raise TypeError('Data should be a Numpy array')
 
         n = len(data[0])
-        maximum = self._get_max(data)
-        minimum = self._get_min(data)
+        maximum = np.amax(data, axis=0)
+        minimum = np.amin(data, axis=0)
         coef = []
         rescaled_data = []
         for i in range(n):
@@ -105,8 +71,6 @@ class SparseComputation:
         if not isinstance(array, np.ndarray):
             raise TypeError('The coordinates of the box' +
                             'should be a Numpy array')
-        if not isinstance(array[0], int):
-            raise TypeError('The coordinates of the box should be integer')
 
         result = 0
         for i in range(len(array)):
@@ -151,13 +115,16 @@ class SparseComputation:
             for increment in itertools.product(range(-1, 2), repeat=n):
                 id_incremented = np.array(box_id)+np.array(increment)
                 grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
-                '''if grid_res_basis_id <= grid_res_basis_id_incremented:'''
-                if tuple(id_incremented) in boxes_dict:
-                    pairs_list = itertools.product(boxes_dict[box_id],
-                                                   boxes_dict[tuple(id_incremented)])
-                    for (a, b) in pairs_list:
-                        if a < b and not (a, b) in pairs:
-                            pairs.append((a, b))
+                if grid_res_basis_id == grid_res_basis_id_incremented:
+                    for i in range(len(boxes_dict[box_id])):
+                        for j in range(i+1, len(boxes_dict[box_id])):
+                            pairs.append(boxes_dict[box_id][i],
+                                         boxes_dict[box_id][j])
+                if grid_res_basis_id < grid_res_basis_id_incremented:
+                    if tuple(id_incremented) in boxes_dict:
+                        for a in boxes_dict[box_id]:
+                            for b in boxes_dict[tuple(id_incremented)]:
+                                pairs.append((a, b))
         return pairs
 
     def get_similar_indices(self, data):

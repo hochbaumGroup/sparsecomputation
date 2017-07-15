@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.discover('tests')

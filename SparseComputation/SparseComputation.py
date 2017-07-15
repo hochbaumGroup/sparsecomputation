@@ -71,8 +71,6 @@ class SparseComputation:
         if not isinstance(array, np.ndarray):
             raise TypeError('The coordinates of the box' +
                             'should be a Numpy array')
-        if not isinstance(array[0], int):
-            raise TypeError('The coordinates of the box should be integer')
 
         result = 0
         for i in range(len(array)):

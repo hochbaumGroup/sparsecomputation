@@ -43,23 +43,21 @@ class SparseComputation:
             raise TypeError('Data should be a Numpy array')
 
         n = len(data[0])
-        maximum = np.amax(data, axis=0)
-        minimum = np.amin(data, axis=0)
-        coef = []
-        rescaled_data = []
-        for i in range(n):
-            try:
-                toAppend = float(self.gridResolution)/(maximum[i]-minimum[i])
-                coef.append(toAppend)
-            except ZeroDivisionError:
-                coef.append(0)
-        for vec in data:
-            rescaled_vec = []
-            for i in range(n):
-                rescaled_vec.append(min(int((vec[i]-minimum[i])*coef[i]),
-                                        self.gridResolution-1))
-            rescaled_data.append(rescaled_vec)
-        return np.array(rescaled_data)
+        maximum = np.amax(data, axis=0, keepdims=True)
+        minimum = np.amin(data, axis=0, keepdims=True)
+
+        gap = maximum - minimum
+        gap = np.where(gap > 0, gap, 1)
+
+        coef = float(self.gridResolution) / gap
+
+        rescaled_data = (data - minimum) * coef
+        rescaled_data = rescaled_data.astype('int')
+
+        rescaled_data = np.where(rescaled_data < self.gridResolution,
+                                 rescaled_data, self.gridResolution - 1)
+
+        return rescaled_data
 
     def _index_to_box_id(self, indices):
         '''

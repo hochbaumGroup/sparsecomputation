@@ -1,6 +1,6 @@
 import numpy as np
 import itertools
-import six
+from six.moves import zip
 
 
 class SparseComputation:
@@ -105,7 +105,7 @@ class SparseComputation:
             for increment in increments:
                 id_incremented = tuple(a + b
                                        for a, b
-                                       in six.zip(box_id, increment))
+                                       in zip(box_id, increment))
                 if id_incremented in boxes_dict:
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]

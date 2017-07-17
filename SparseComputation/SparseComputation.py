@@ -110,10 +110,7 @@ class SparseComputation:
                 grid_res_basis_id_incremented = self._index_to_box_id(
                     id_incremented)
                 if grid_res_basis_id == grid_res_basis_id_incremented:
-                    for i in range(len(boxes_dict[box_id])):
-                        for j in range(i+1, len(boxes_dict[box_id])):
-                            pairs.append((boxes_dict[box_id][i],
-                                         boxes_dict[box_id][j]))
+                    pairs += itertools.combinations(boxes_dict[box_id], 2)
                 if grid_res_basis_id < grid_res_basis_id_incremented:
                     if id_incremented in boxes_dict:
                         pairs += itertools.product(

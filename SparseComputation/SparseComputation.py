@@ -116,9 +116,9 @@ class SparseComputation:
                                          boxes_dict[box_id][j]))
                 if grid_res_basis_id < grid_res_basis_id_incremented:
                     if id_incremented in boxes_dict:
-                        for a in boxes_dict[box_id]:
-                            for b in boxes_dict[id_incremented]:
-                                pairs.append((a, b))
+                        pairs += itertools.product(
+                            boxes_dict[box_id], boxes_dict[id_incremented]
+                            )
         return pairs
 
     def get_similar_indices(self, data):

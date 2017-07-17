@@ -67,7 +67,7 @@ class SparseComputation:
         output: int
         '''
 
-        return (idx * self.gridResolution ** i
+        return tuple(idx * self.gridResolution ** i
                 for i, idx in enumerate(indices))
 
     def _get_boxes(self, data):
@@ -106,7 +106,7 @@ class SparseComputation:
         for box_id in boxes_dict:
             grid_res_basis_id = self._index_to_box_id(box_id)
             for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = (a + b for a, b in zip(box_id, increment))
+                id_incremented = tuple(a + b for a, b in zip(box_id, increment))
                 grid_res_basis_id_incremented = self._index_to_box_id(
                     id_incremented)
                 if grid_res_basis_id == grid_res_basis_id_incremented:

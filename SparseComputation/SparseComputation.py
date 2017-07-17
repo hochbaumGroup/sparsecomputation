@@ -92,16 +92,23 @@ class SparseComputation:
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
+
+        increments = tuple(increment
+                           for increment
+                           in itertools.product(range(-1, 2), repeat=n)
+                           if increment > ((0, ) * n)
+                           )
+
         for box_id in boxes_dict:
-            for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = tuple(a + b for a, b in zip(box_id, increment))
-                if box_id <= id_incremented and id_incremented in boxes_dict:
-                    if box_id == id_incremented:
-                        pairs += itertools.combinations(boxes_dict[box_id], 2)
-                    else:
-                        pairs += itertools.product(
-                            boxes_dict[box_id], boxes_dict[id_incremented]
-                            )
+            pairs += itertools.combinations(boxes_dict[box_id], 2)
+            for increment in increments:
+                id_incremented = tuple(a + b
+                                       for a, b
+                                       in itertools.izip(box_id, increment))
+                if id_incremented in boxes_dict:
+                    pairs += itertools.product(
+                        boxes_dict[box_id], boxes_dict[id_incremented]
+                        )
         return pairs
 
     def get_similar_indices(self, data):

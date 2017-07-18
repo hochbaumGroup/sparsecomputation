@@ -49,7 +49,7 @@ class SparseComputation:
         rescaled_data = []
         for i in range(n):
             try:
-                toAppend = float(self.gridResolution)/(maximum[i]-minimum[i])
+                toAppend = float(self.gridResolution)/float(maximum[i]-minimum[i])
                 coef.append(toAppend)
             except ZeroDivisionError:
                 coef.append(0)

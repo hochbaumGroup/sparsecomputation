@@ -1,6 +1,6 @@
 import numpy as np
 import itertools
-
+from sklearn import preprocessing
 
 class SparseComputation:
 
@@ -153,24 +153,87 @@ class SparseComputation:
 
 class SparseShiftedComputation (SparseComputation):
     
-    def _getNumberOfShiftedGrids(self,data):
-        p = len(data[0])
-        return 2**p
-    
     def _getOffsets(self,nGrid,p):
+        '''
+        get offsets for each grid
+        input: number of grids and number of dimensions
+        output: np.array 
+        '''
         offsets = []
         for i in range(nGrid):
-            offsets.append(bin(i))
-        return offsets
+            ls = [int(i) for i in np.binary_repr(i, p)]
+            offsets.append(ls)
+        return np.array(offsets)
+    
+    def _get_pairs_of_grid(self,data,offset):
+        '''`_get_pairs_of_grid` constructs a grid according to the specified 
+        offset returns all pairs of objects that lie within the same grid block
+        input: data (np.array), offsets (np.array)
+        output: list of pairs (list[(int,int)])
+        '''
+        # Shift data
+        data = data + offset[np.newaxis,:]
+        # Get interval length
+        intervalLength = 1/self.gridResolution
+        # Get coordinates for each object
+        coordinates = np.floor(data/intervalLength)+1
+        coordinates = coordinates.astype(int)
+        coordinates[coordinates==self.gridResolution+1] -= 1
+        coordinates -= 1
+        # Convert coordinates to BoxIDs
+        p = len(data[0])
+        dims = tuple([self.gridResolution for i in range(p)])
+        BoxID = np.ravel_multi_index(np.transpose(coordinates),dims)
+        # Get unique BoxIDs
+        unique_BoxIDs = set(BoxID)
+        # Get object ids
+        ObjectID = np.array(list(range(len(data[:,0]))))
+        # Get all objects with same box id
+        boxes = []
+        for my_id in unique_BoxIDs:
+            ls = ObjectID[BoxID==my_id]
+            boxes.append(ls)
+        # Generate output
+        pairs = []
+        for box in boxes:
+            new_pairs = list(itertools.combinations(box,2))
+            pairs = pairs + new_pairs
+        return pairs
     
     def get_similar_indices(self, data): 
-        
+        '''`get_similar_indices` uses a set of shifted grids to find pairs of
+        similar objects in the data
+
+        `get_similar_indices` first projects the (high-dimensional) data set
+        onto a low-dimensional space using the `DimReducer`. Then multiple
+        shifted grids are created and for each grid the pairs of objects that
+        fall within the same grid block are returned.
+
+        Args:
+            data (numpy.ndarray): input data with n rows (objects) and p
+                                  columns (features) 
+        Returns:
+            (list [(int, int)]): list of pairs. Each pair contains indices of
+                                 objects that are similar
+        '''
         reduced_data = self.dimReducer.fit_transform(data)
-        nGrids = self._getNumberOfShiftedGrids(reduced_data)
+        p = len(reduced_data[0])
+        nGrids = 2**p
+        offsets = self._getOffsets(nGrids,p)
         
-        # compute offset for each grid
-        #offsets = dec2bin((0:2^d-1)) - '0';
-        #grids = constructGrids(reduced_data,offsets,self.gridResolution)       
+        # Normalize reduced data
+        min_max_scaler = preprocessing.MinMaxScaler()
+        normalized_data = min_max_scaler.fit_transform(reduced_data)
+        
+        # Compute offsets
+        intervalLength = 1/self.gridResolution
+        offsets = offsets*(intervalLength/2)
+        
+        # Get pairs from each grid
+        pairs = []
+        for offset in offsets:
+            pairs = pairs + self._get_pairs_of_grid(normalized_data,offset)
+        return set(pairs)
     
     
     

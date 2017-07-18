@@ -54,8 +54,5 @@ class TestSparseShiftedComputation(unittest.TestCase):
                           self.dimReducer, '1')
         self.assertRaises(ValueError, SparseShiftedComputation, 
                           self.dimReducer, 0)
-        
-    def test_getNumberOfShiftedGrids(self):
-        nGrid = self.b._getNumberOfShiftedGrids(self.data)
-        self.assertEqual(nGrid, 4)
+
         

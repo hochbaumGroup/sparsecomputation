@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+from six.moves import zip
 
 
 class SparseComputation:
@@ -43,39 +44,21 @@ class SparseComputation:
             raise TypeError('Data should be a Numpy array')
 
         n = len(data[0])
-        maximum = np.amax(data, axis=0)
-        minimum = np.amin(data, axis=0)
-        coef = []
-        rescaled_data = []
-        for i in range(n):
-            try:
-                toAppend = float(self.gridResolution)/float(maximum[i]-minimum[i])
-                coef.append(toAppend)
-            except ZeroDivisionError:
-                coef.append(0)
-        for vec in data:
-            rescaled_vec = []
-            for i in range(n):
-                rescaled_vec.append(min(int((vec[i]-minimum[i])*coef[i]),
-                                        self.gridResolution-1))
-            rescaled_data.append(rescaled_vec)
-        return np.array(rescaled_data)
+        maximum = np.amax(data, axis=0, keepdims=True)
+        minimum = np.amin(data, axis=0, keepdims=True)
 
-    def _index_to_boxe_id(self, array):
-        '''
-        Takes the coordinates of a box as input, retunr the id of this box in
-        the dictionary
-        input: numpy array
-        output: int
-        '''
-        if not isinstance(array, np.ndarray):
-            raise TypeError('The coordinates of the box' +
-                            'should be a Numpy array')
+        gap = maximum - minimum
+        gap = np.where(gap > 0, gap, 1)
 
-        result = 0
-        for i in range(len(array)):
-            result += array[i]*self.gridResolution**i
-        return result
+        coef = float(self.gridResolution) / gap
+
+        rescaled_data = (data - minimum) * coef
+        rescaled_data = rescaled_data.astype('int')
+
+        rescaled_data = np.where(rescaled_data < self.gridResolution,
+                                 rescaled_data, self.gridResolution - 1)
+
+        return rescaled_data
 
     def _get_boxes(self, data):
         '''
@@ -110,21 +93,23 @@ class SparseComputation:
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
         pairs = []
+
+        increments = tuple(increment
+                           for increment
+                           in itertools.product(range(-1, 2), repeat=n)
+                           if increment > ((0, ) * n)
+                           )
+
         for box_id in boxes_dict:
-            grid_res_basis_id = self._index_to_boxe_id(np.array(box_id))
-            for increment in itertools.product(range(-1, 2), repeat=n):
-                id_incremented = np.array(box_id)+np.array(increment)
-                grid_res_basis_id_incremented = self._index_to_boxe_id(id_incremented)
-                if grid_res_basis_id == grid_res_basis_id_incremented:
-                    for i in range(len(boxes_dict[box_id])):
-                        for j in range(i+1, len(boxes_dict[box_id])):
-                            pairs.append((boxes_dict[box_id][i],
-                                         boxes_dict[box_id][j]))
-                if grid_res_basis_id < grid_res_basis_id_incremented:
-                    if tuple(id_incremented) in boxes_dict:
-                        for a in boxes_dict[box_id]:
-                            for b in boxes_dict[tuple(id_incremented)]:
-                                pairs.append((a, b))
+            pairs += itertools.combinations(boxes_dict[box_id], 2)
+            for increment in increments:
+                id_incremented = tuple(a + b
+                                       for a, b
+                                       in zip(box_id, increment))
+                if id_incremented in boxes_dict:
+                    pairs += itertools.product(
+                        boxes_dict[box_id], boxes_dict[id_incremented]
+                        )
         return pairs
 
     def get_similar_indices(self, data):

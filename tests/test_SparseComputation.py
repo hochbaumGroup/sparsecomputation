@@ -1,6 +1,7 @@
 import numpy as np
 import unittest
 import sys
+import six
 import os
 from SparseComputation import SparseComputation
 from SparseComputation.DimReducer import DimReducer
@@ -36,12 +37,12 @@ class TestSparseComputation(unittest.TestCase):
 
     def test_get_pairs(self):
         self.assertRaises(TypeError, self.b._get_pairs, [])
-        pairs = np.array(self.b._get_pairs(self.data))
-        expected_pairs = np.array([(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
-                                  (4, 1), (4, 3), (4, 2), (3, 1), (3, 2)])
-        np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)
+        pairs = self.b._get_pairs(self.data)
+        expected_pairs = [(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
+                                  (4, 1), (4, 3), (4, 2), (1, 3), (3, 2)]
+        six.assertCountEqual(self, pairs, expected_pairs)
 
     def test_get_pairs_same_box(self):
-        pairs = np.array(self.b._get_pairs(np.array([[0, 0], [0, 0]])))
-        expected_pairs = np.array([(0, 1)])
-        np.testing.assert_array_almost_equal(pairs, expected_pairs, decimal=6)
+        pairs = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
+        expected_pairs = [(0, 1)]
+        six.assertCountEqual(self, pairs, expected_pairs)

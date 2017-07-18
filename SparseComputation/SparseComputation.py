@@ -164,7 +164,7 @@ class SparseShiftedComputation (SparseComputation):
             ls = [int(i) for i in np.binary_repr(i, p)]
             offsets.append(ls)
         return np.array(offsets)
-    
+
     def _get_pairs_of_grid(self,data,offset):
         '''`_get_pairs_of_grid` constructs a grid according to the specified 
         offset returns all pairs of objects that lie within the same grid block
@@ -184,20 +184,29 @@ class SparseShiftedComputation (SparseComputation):
         p = len(data[0])
         dims = tuple([self.gridResolution for i in range(p)])
         BoxID = np.ravel_multi_index(np.transpose(coordinates),dims)
-        # Get unique BoxIDs
-        unique_BoxIDs = set(BoxID)
         # Get object ids
         ObjectID = np.array(list(range(len(data[:,0]))))
-        # Get all objects with same box id
+        # Sort BoxIDs
+        ls = list(zip(BoxID,ObjectID))
+        ls.sort(key=lambda x: x[0])
+        ls_x = [x for (x,y) in ls]
+        ls_y = [y for (x,y) in ls]
+        y = np.diff(ls_x) 
+        breakpoints = np.nonzero(y)[0]
+        breakpoints += 1
+        breakpoints = np.insert(breakpoints,0,0)
+        sizes = np.diff(np.append(breakpoints,len(y)+1))
+        z = np.where(sizes==1)
+        breakpoints = np.delete(breakpoints,z)
+        sizes = np.delete(sizes,z)
+        breakpoints_end = breakpoints + sizes
+        numBoxes = len(breakpoints)
         boxes = []
-        for my_id in unique_BoxIDs:
-            ls = ObjectID[BoxID==my_id]
-            boxes.append(ls)
-        # Generate output
+        for i in range(numBoxes):
+            boxes.append(ls_y[breakpoints[i]:breakpoints_end[i]])
         pairs = []
         for box in boxes:
-            new_pairs = list(itertools.combinations(box,2))
-            pairs = pairs + new_pairs
+            pairs += itertools.combinations(box,2)
         return pairs
     
     def get_similar_indices(self, data): 

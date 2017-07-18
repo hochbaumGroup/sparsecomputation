@@ -150,6 +150,39 @@ class SparseShiftedComputation (SparseComputation):
             ls = [int(i) for i in np.binary_repr(i, p)]
             offsets.append(ls)
         return np.array(offsets)
+    
+    def _get_boxes(self,BoxID,ObjectID):
+        '''
+        get for each box the objects that fall within
+        input: vector of box ids (np.array), vector of object ids (np.array)
+        output: list of lists
+        '''
+        # Combine vectors into list of tuples
+        ls = list(zip(BoxID,ObjectID))
+        # Sort list according to BoxID
+        ls.sort(key=lambda x: x[0])
+        BoxID_sorted = [x for (x,y) in ls]
+        ObjectID_sorted = [y for (x,y) in ls]
+        # Get positions (breakpoints) in vector where BoxID changes
+        difference = np.diff(BoxID_sorted) 
+        breakpoints = np.nonzero(difference)[0]
+        # Get starting positions by incrementing breakpoints by 1
+        starting_positions = breakpoints + 1
+        # Add first position in vector as starting position
+        starting_positions = np.insert(starting_positions,0,0)
+        # Get number of objects in each box 
+        nObjectsPerBox = np.diff(np.append(starting_positions,len(breakpoints)+1))
+        # Remove boxes which contain a single object
+        z = np.where(nObjectsPerBox==1)
+        starting_positions = np.delete(starting_positions,z)
+        nObjectsPerBox = np.delete(nObjectsPerBox,z)
+        # Compute ending positions
+        ending_positions = starting_positions + nObjectsPerBox
+        numBoxes = len(starting_positions)
+        boxes = []
+        for i in range(numBoxes):
+            boxes.append(ObjectID_sorted[starting_positions[i]:ending_positions[i]])
+        return boxes
 
     def _get_pairs_of_grid(self,data,offset):
         '''`_get_pairs_of_grid` constructs a grid according to the specified 
@@ -172,24 +205,9 @@ class SparseShiftedComputation (SparseComputation):
         BoxID = np.ravel_multi_index(np.transpose(coordinates),dims)
         # Get object ids
         ObjectID = np.array(list(range(len(data[:,0]))))
-        # Sort BoxIDs
-        ls = list(zip(BoxID,ObjectID))
-        ls.sort(key=lambda x: x[0])
-        ls_x = [x for (x,y) in ls]
-        ls_y = [y for (x,y) in ls]
-        y = np.diff(ls_x) 
-        breakpoints = np.nonzero(y)[0]
-        breakpoints += 1
-        breakpoints = np.insert(breakpoints,0,0)
-        sizes = np.diff(np.append(breakpoints,len(y)+1))
-        z = np.where(sizes==1)
-        breakpoints = np.delete(breakpoints,z)
-        sizes = np.delete(sizes,z)
-        breakpoints_end = breakpoints + sizes
-        numBoxes = len(breakpoints)
-        boxes = []
-        for i in range(numBoxes):
-            boxes.append(ls_y[breakpoints[i]:breakpoints_end[i]])
+        # Get objects that fall within each box
+        boxes = self._get_boxes(BoxID,ObjectID)
+        # Construct pairs
         pairs = []
         for box in boxes:
             pairs += itertools.combinations(box,2)

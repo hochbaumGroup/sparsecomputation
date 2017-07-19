@@ -2,8 +2,8 @@ import unittest
 import sys
 import os
 import numpy as np
-from SparseComputation import ApproximatePCA
-from SparseComputation import PCA
+from sparsecomputation import ApproximatePCA
+from sparsecomputation import PCA
 
 
 class TestApproximatePCA(unittest.TestCase):

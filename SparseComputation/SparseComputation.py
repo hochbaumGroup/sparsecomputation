@@ -150,19 +150,17 @@ class SparseShiftedComputation (SparseComputation):
             ls = [int(i) for i in np.binary_repr(i, p)]
             offsets.append(ls)
         return np.array(offsets)
-    
+    @profile
     def _get_boxes(self,BoxID,ObjectID):
         '''
         get for each box the objects that fall within
         input: vector of box ids (np.array), vector of object ids (np.array)
         output: list of lists
         '''
-        # Combine vectors into list of tuples
-        ls = list(zip(BoxID,ObjectID))
-        # Sort list according to BoxID
-        ls.sort(key=lambda x: x[0])
-        BoxID_sorted = [x for (x,y) in ls]
-        ObjectID_sorted = [y for (x,y) in ls]
+        # Sort BoxID and ObjectID according to BoxID
+        idx = np.argsort(BoxID)
+        BoxID_sorted = BoxID[idx]
+        ObjectID_sorted = list(ObjectID[idx])
         # Get positions (breakpoints) in vector where BoxID changes
         difference = np.diff(BoxID_sorted) 
         breakpoints = np.nonzero(difference)[0]
@@ -171,7 +169,7 @@ class SparseShiftedComputation (SparseComputation):
         # Add first position in vector as starting position
         starting_positions = np.insert(starting_positions,0,0)
         # Get number of objects in each box 
-        nObjectsPerBox = np.diff(np.append(starting_positions,len(breakpoints)+1))
+        nObjectsPerBox = np.diff(np.append(starting_positions,len(ObjectID_sorted)+1))
         # Remove boxes which contain a single object
         z = np.where(nObjectsPerBox==1)
         starting_positions = np.delete(starting_positions,z)
@@ -183,13 +181,15 @@ class SparseShiftedComputation (SparseComputation):
         for i in range(numBoxes):
             boxes.append(ObjectID_sorted[starting_positions[i]:ending_positions[i]])
         return boxes
-
+    @profile
     def _get_pairs_of_grid(self,data,offset):
         '''`_get_pairs_of_grid` constructs a grid according to the specified 
         offset returns all pairs of objects that lie within the same grid block
         input: data (np.array), offsets (np.array)
         output: list of pairs (list[(int,int)])
         '''
+        # Get object ids
+        ObjectID = np.array(list(range(len(data[:,0]))))
         # Shift data
         data = data + offset[np.newaxis,:]
         # Get interval length
@@ -197,22 +197,25 @@ class SparseShiftedComputation (SparseComputation):
         # Get coordinates for each object
         coordinates = np.floor(data/intervalLength)+1
         coordinates = coordinates.astype(int)
-        coordinates[coordinates==self.gridResolution+1] -= 1
+        coordinates[data==1] -= 1
         coordinates -= 1
+        # Remove objects that fall out of the grid
+        idx = np.where(coordinates>self.gridResolution-1)
+        coordinates = np.delete(coordinates,idx[0],0)
+        ObjectID = np.delete(ObjectID,idx[0],0)
         # Convert coordinates to BoxIDs
         p = len(data[0])
         dims = tuple([self.gridResolution for i in range(p)])
         BoxID = np.ravel_multi_index(np.transpose(coordinates),dims)
-        # Get object ids
-        ObjectID = np.array(list(range(len(data[:,0]))))
         # Get objects that fall within each box
         boxes = self._get_boxes(BoxID,ObjectID)
         # Construct pairs
         pairs = []
         for box in boxes:
+            box.sort()
             pairs += itertools.combinations(box,2)
         return pairs
-    
+    @profile
     def get_similar_indices(self, data): 
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data
@@ -233,21 +236,17 @@ class SparseShiftedComputation (SparseComputation):
         p = len(reduced_data[0])
         nGrids = 2**p
         offsets = self._getOffsets(nGrids,p)
-        
         # Normalize reduced data
         min_max_scaler = preprocessing.MinMaxScaler()
         normalized_data = min_max_scaler.fit_transform(reduced_data)
-        
         # Compute offsets
         intervalLength = 1/self.gridResolution
         offsets = offsets*(intervalLength/2)
-        
-        # Get pairs from each grid
+        # Determine pairs
         pairs = []
         for offset in offsets:
             pairs = pairs + self._get_pairs_of_grid(normalized_data,offset)
         return set(pairs)
-    
     
     
     

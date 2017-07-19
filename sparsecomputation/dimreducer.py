@@ -7,7 +7,7 @@ class DimReducer:
     def __init__(self, dimLow=3):
         self.dimLow = dimLow
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, **kwargs):
         pass
 
 
@@ -34,7 +34,7 @@ class PCA (DimReducer):
             raise ValueError('dimLow should be positive')
         self.dimLow = dimLow
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
 
@@ -183,7 +183,7 @@ class ApproximatePCA(DimReducer):
         result = np.copy(data[list_rows, :])
         return result
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, seed=None, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
 
@@ -205,6 +205,9 @@ class ApproximatePCA(DimReducer):
         '''
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
+
+        if seed:
+            np.random.seed(seed)
 
         col_reduced_data = self._col_reduction(data)
         reduced_data = self._row_reduction(col_reduced_data)

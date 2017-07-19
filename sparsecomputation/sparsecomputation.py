@@ -51,7 +51,7 @@ class SparseComputation:
         gap = maximum - minimum
         gap = np.where(gap > 0, gap, 1)
 
-        coef = float(self.gridResolution) / gap
+        coef = float(self.gridResolution) / float(gap)
 
         rescaled_data = (data - minimum) * coef
         rescaled_data = rescaled_data.astype('int')
@@ -138,12 +138,12 @@ class SparseComputation:
         return self._get_pairs(reduced_data)
 
 class SparseShiftedComputation (SparseComputation):
-    
+
     def _getOffsets(self,nGrid,p):
         '''
         get offsets for each grid
         input: number of grids and number of dimensions
-        output: np.array 
+        output: np.array
         '''
         offsets = []
         for i in range(nGrid):
@@ -162,13 +162,13 @@ class SparseShiftedComputation (SparseComputation):
         BoxID_sorted = BoxID[idx]
         ObjectID_sorted = list(ObjectID[idx])
         # Get positions (breakpoints) in vector where BoxID changes
-        difference = np.diff(BoxID_sorted) 
+        difference = np.diff(BoxID_sorted)
         breakpoints = np.nonzero(difference)[0]
         # Get starting positions by incrementing breakpoints by 1
         starting_positions = breakpoints + 1
         # Add first position in vector as starting position
         starting_positions = np.insert(starting_positions,0,0)
-        # Get number of objects in each box 
+        # Get number of objects in each box
         nObjectsPerBox = np.diff(np.append(starting_positions,len(ObjectID_sorted)+1))
         # Remove boxes which contain a single object
         z = np.where(nObjectsPerBox==1)
@@ -183,7 +183,7 @@ class SparseShiftedComputation (SparseComputation):
         return boxes
 
     def _get_pairs_of_grid(self,data,offset):
-        '''`_get_pairs_of_grid` constructs a grid according to the specified 
+        '''`_get_pairs_of_grid` constructs a grid according to the specified
         offset returns all pairs of objects that lie within the same grid block
         input: data (np.array), offsets (np.array)
         output: list of pairs (list[(int,int)])
@@ -193,9 +193,9 @@ class SparseShiftedComputation (SparseComputation):
         # Shift data
         data = data + offset[np.newaxis,:]
         # Get interval length
-        intervalLength = 1/self.gridResolution
+        intervalLength = 1 / float(self.gridResolution)
         # Get coordinates for each object
-        coordinates = np.floor(data/intervalLength)+1
+        coordinates = np.floor(data / float(intervalLength))+1
         coordinates = coordinates.astype(int)
         coordinates[data==1] -= 1
         coordinates -= 1
@@ -216,7 +216,7 @@ class SparseShiftedComputation (SparseComputation):
             pairs += itertools.combinations(box,2)
         return pairs
 
-    def get_similar_indices(self, data): 
+    def get_similar_indices(self, data):
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data
 
@@ -227,7 +227,7 @@ class SparseShiftedComputation (SparseComputation):
 
         Args:
             data (numpy.ndarray): input data with n rows (objects) and p
-                                  columns (features) 
+                                  columns (features)
         Returns:
             (list [(int, int)]): list of pairs. Each pair contains indices of
                                  objects that are similar
@@ -240,14 +240,10 @@ class SparseShiftedComputation (SparseComputation):
         min_max_scaler = preprocessing.MinMaxScaler()
         normalized_data = min_max_scaler.fit_transform(reduced_data)
         # Compute offsets
-        intervalLength = 1/self.gridResolution
-        offsets = offsets*(intervalLength/2)
+        intervalLength = 1/ float(self.gridResolution)
+        offsets = offsets*(intervalLength/ float(2))
         # Determine pairs
         pairs = []
         for offset in offsets:
             pairs = pairs + self._get_pairs_of_grid(normalized_data,offset)
         return set(pairs)
-    
-    
-    
-    

@@ -113,7 +113,7 @@ class SparseComputation:
                         )
         return pairs
 
-    def get_similar_indices(self, data):
+    def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` computes the similar indices in the data and
         return a list of pairs
 
@@ -134,7 +134,7 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
 
-        reduced_data = self.dimReducer.fit_transform(data)
+        reduced_data = self.dimReducer.fit_transform(data, seed)
         return self._get_pairs(reduced_data)
 
 class SparseShiftedComputation (SparseComputation):

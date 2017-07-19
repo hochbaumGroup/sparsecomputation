@@ -150,7 +150,7 @@ class SparseShiftedComputation (SparseComputation):
             ls = [int(i) for i in np.binary_repr(i, p)]
             offsets.append(ls)
         return np.array(offsets)
-    @profile
+
     def _get_boxes(self,BoxID,ObjectID):
         '''
         get for each box the objects that fall within
@@ -181,7 +181,7 @@ class SparseShiftedComputation (SparseComputation):
         for i in range(numBoxes):
             boxes.append(ObjectID_sorted[starting_positions[i]:ending_positions[i]])
         return boxes
-    @profile
+
     def _get_pairs_of_grid(self,data,offset):
         '''`_get_pairs_of_grid` constructs a grid according to the specified 
         offset returns all pairs of objects that lie within the same grid block
@@ -215,7 +215,7 @@ class SparseShiftedComputation (SparseComputation):
             box.sort()
             pairs += itertools.combinations(box,2)
         return pairs
-    @profile
+
     def get_similar_indices(self, data): 
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data

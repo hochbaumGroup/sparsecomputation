@@ -51,7 +51,7 @@ class SparseComputation:
         gap = maximum - minimum
         gap = np.where(gap > 0, gap, 1)
 
-        coef = float(self.gridResolution) / float(gap)
+        coef = float(self.gridResolution) / gap
 
         rescaled_data = (data - minimum) * coef
         rescaled_data = rescaled_data.astype('int')
@@ -241,7 +241,7 @@ class SparseShiftedComputation (SparseComputation):
         normalized_data = min_max_scaler.fit_transform(reduced_data)
         # Compute offsets
         intervalLength = 1/ float(self.gridResolution)
-        offsets = offsets*(intervalLength/ float(2))
+        offsets = offsets*(intervalLength / 2.0)
         # Determine pairs
         pairs = []
         for offset in offsets:

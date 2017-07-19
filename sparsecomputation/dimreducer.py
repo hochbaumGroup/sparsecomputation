@@ -206,7 +206,10 @@ class ApproximatePCA(DimReducer):
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
 
-        col_reduced_data = self._col_reduction(data)
+        if abs(self.fracCol - 1.0) <= 1e-8:
+            col_reduced_data = data
+        else:
+            col_reduced_data = self._col_reduction(data)
         reduced_data = self._row_reduction(col_reduced_data)
         pca = sklearn.decomposition.PCA(n_components=self.dimLow)
         pca.fit(reduced_data)

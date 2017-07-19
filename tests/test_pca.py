@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
-from SparseComputation import PCA
+from sparsecomputation import PCA
 
 
 class TestPCA(unittest.TestCase):

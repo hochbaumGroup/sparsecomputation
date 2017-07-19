@@ -216,7 +216,7 @@ class SparseShiftedComputation (SparseComputation):
             pairs += itertools.combinations(box,2)
         return pairs
 
-    def get_similar_indices(self, data):
+    def get_similar_indices(self, data, seed=None):
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data
 
@@ -232,7 +232,7 @@ class SparseShiftedComputation (SparseComputation):
             (list [(int, int)]): list of pairs. Each pair contains indices of
                                  objects that are similar
         '''
-        reduced_data = self.dimReducer.fit_transform(data)
+        reduced_data = self.dimReducer.fit_transform(data, seed)
         p = len(reduced_data[0])
         nGrids = 2**p
         offsets = self._getOffsets(nGrids,p)

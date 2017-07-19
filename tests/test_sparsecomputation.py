@@ -3,8 +3,8 @@ import unittest
 import sys
 import six
 import os
-from SparseComputation import SparseComputation
-from SparseComputation.DimReducer import DimReducer
+from sparsecomputation import SparseComputation
+from sparsecomputation.dimreducer import DimReducer
 
 
 class TestSparseComputation(unittest.TestCase):

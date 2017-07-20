@@ -71,7 +71,7 @@ class SparseReduce:
                                  rescaled_data, Resolution - 1)
         return rescaled_data
 
-    def _get_sub_blocks(self, data):
+    def _get_sub_blocks(self, data, label=None):
         '''
         get the data after rescaling
         sort it in subblocks
@@ -84,7 +84,10 @@ class SparseReduce:
         n = len(data[0])
         result = {}
         for i in range(0, len(data)):
-            box_id = tuple(data[i])
+            if not(label is None):
+                box_id = tuple(np.append(data[i], label[i]))
+            else:
+                box_id = tuple(data[i])
             if not (box_id in result):
                 result[box_id] = []
             result[box_id].append(i)
@@ -139,7 +142,7 @@ class SparseReduce:
                         )
         return pairs
 
-    def get_Reduced_data(self, data):
+    def get_Reduced_data(self, data, label=None):
         '''
         `get_Reduced_data` is a method that first projects `data` onto a low
         dimensional space using the provided `DimReducer`
@@ -164,23 +167,30 @@ class SparseReduce:
         '''
         reduced_data = self.dimReducer.fit_transform(data)
         rescaled_data = self._rescale_data(reduced_data)
-        subblocks = self._get_sub_blocks(rescaled_data)
+        subblocks = self._get_sub_blocks(rescaled_data, label)
         blocks = self._get_boxes(subblocks, rescaled_data)
         pairs = self._get_pairs(rescaled_data, blocks)
         return (subblocks, pairs)
 
-    def sparseReduceComputation(self, data):
-        (subblocks, pairs) = self.get_Reduced_data(data)
+    def sparseReduceComputation(self, data, label=None):
+        (subblocks, pairs) = self.get_Reduced_data(data, label)
         rep_weight = []
         rep_data = []
         rep_mapping = {}
+        if not (label is None):
+            rep_label = []
         for subblock in subblocks:
             idx = len(rep_data)
-            multiplicity = len(subblocks[subblock])
-            centroid = data[subblocks[subblock]].sum(axis=0)[:]/float(multiplicity)
+            weight = len(subblocks[subblock])
+            if not (label is None):
+                rep_label.append(subblock[-1])
+            centroid = data[subblocks[subblock]].sum(axis=0)[:]/float(weight)
             rep_mapping[subblock] = idx
             rep_data.append(centroid)
-            rep_weight.append(multiplicity)
+            rep_weight.append(weight)
         rep_weight = np.array(rep_weight)
         rep_data = np.array(rep_data)
+        if not (label is None):
+            rep_label = np.array(rep_label)
+            return (pairs, rep_mapping, rep_weight, rep_data, rep_label)
         return (pairs, rep_mapping, rep_weight, rep_data)

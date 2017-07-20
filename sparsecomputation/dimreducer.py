@@ -214,7 +214,6 @@ class ApproximatePCA(DimReducer):
         if seed:
             np.random.seed(seed)
 
-        col_reduced_data = self._col_reduction(data)
         reduced_data = self._row_reduction(col_reduced_data)
         pca = sklearn.decomposition.PCA(n_components=self.dimLow)
         pca.fit(reduced_data)

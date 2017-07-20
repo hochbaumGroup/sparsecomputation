@@ -4,7 +4,7 @@ import sys
 import six
 import os
 from SparseComputation.SparseReduce import SparseReduce
-from SparseComputation.DimReducer import DimReducer
+from SparseComputation.DimReducer import PCA
 
 
 class TestSparseReduce(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestSparseReduce(unittest.TestCase):
     def setUp(self):
         self.gridResolution = 2
         self.subblockResolution = 3
-        self.dimReducer = DimReducer(3)
+        self.dimReducer = PCA(3)
         self.sr = SparseReduce(self.dimReducer, self.gridResolution,
                                self.subblockResolution)
         self.data = np.array([[-1, -12, 5], [-1, -12, 6], [-1, -11, 6],
@@ -62,3 +62,6 @@ class TestSparseReduce(unittest.TestCase):
         exp_pairs = [((0, 0, 0), (1, 1, 1)), ((0, 0, 0), (5, 5, 5)),
                      ((1, 1, 1), (5, 5, 5))]
         print pairs
+        print self.sr.get_Reduced_data(self.data)
+        print self.sr.sparseReduceComputation(self.data,label = np.array([0,1,1,1,1]))
+        print self.sr.sparseReduceComputation(self.data)

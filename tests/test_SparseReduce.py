@@ -39,9 +39,9 @@ class TestSparseReduce(unittest.TestCase):
         expected[(0, 0, 0)] = [0, 1, 2]
         expected[(5, 5, 5)] = [3]
         expected[(1, 1, 1)] = [4]
-        np.testing.assert_array_almost_equal(expected.keys(), subblocks.keys())
+        self.assertEqual(expected.keys(), subblocks.keys())
         for key in subblocks.keys():
-            np.testing.assert_array_almost_equal(expected[key], subblocks[key])
+            self.assertEqual(expected[key], subblocks[key])
 
     def test_get_boxes(self):
         rescaled_data = self.sr._rescale_data(self.data)
@@ -50,9 +50,9 @@ class TestSparseReduce(unittest.TestCase):
         expected = {}
         expected[(0, 0, 0)] = [(1, 1, 1), (0, 0, 0)]
         expected[(1, 1, 1)] = [(5, 5, 5)]
-        np.testing.assert_array_almost_equal(expected.keys(), blocks.keys())
+        self.assertEqual(expected.keys(), blocks.keys())
         for key in blocks.keys():
-            np.testing.assert_array_almost_equal(expected[key], blocks[key])
+            self.assertEqual(expected[key], blocks[key])
 
     def test_get_reduce(self):
         rescaled_data = self.sr._rescale_data(self.data)

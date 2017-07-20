@@ -139,7 +139,7 @@ class SparseReduce:
                         )
         return pairs
 
-    def get_Reduced_data(data):
+    def get_Reduced_data(self, data):
         '''
         `get_Reduced_data` is a method that first projects `data` onto a low
         dimensional space using the provided `DimReducer`
@@ -168,3 +168,19 @@ class SparseReduce:
         blocks = self._get_boxes(subblocks, rescaled_data)
         pairs = self._get_pairs(rescaled_data, blocks)
         return (subblocks, pairs)
+
+    def sparseReduceComputation(self, data):
+        (subblocks, pairs) = self.get_Reduced_data(data)
+        rep_weight = []
+        rep_data = []
+        rep_mapping = {}
+        for subblock in subblocks:
+            idx = len(rep_data)
+            multiplicity = len(subblocks[subblock])
+            centroid = data[subblocks[subblock]].sum(axis=0)[:]/float(multiplicity)
+            rep_mapping[subblock] = idx
+            rep_data.append(centroid)
+            rep_weight.append(multiplicity)
+        rep_weight = np.array(rep_weight)
+        rep_data = np.array(rep_data)
+        return (pairs, rep_mapping, rep_weight, rep_data)

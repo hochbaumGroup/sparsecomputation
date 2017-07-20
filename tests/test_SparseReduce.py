@@ -61,7 +61,3 @@ class TestSparseReduce(unittest.TestCase):
         pairs = self.sr._get_pairs(rescaled_data, blocks)
         exp_pairs = [((0, 0, 0), (1, 1, 1)), ((0, 0, 0), (5, 5, 5)),
                      ((1, 1, 1), (5, 5, 5))]
-        print pairs
-        print self.sr.get_Reduced_data(self.data)
-        print self.sr.sparseReduceComputation(self.data,label = np.array([0,1,1,1,1]))
-        print self.sr.sparseReduceComputation(self.data)

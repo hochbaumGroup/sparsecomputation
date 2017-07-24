@@ -1,8 +1,10 @@
-import numpy as np
 import itertools
+import six.moves
+import numpy as np
 from sklearn import preprocessing
-from six.moves import zip
 
+# To ignore numpy errors:
+#     pylint: disable=E1101
 
 class SparseComputation:
 
@@ -34,6 +36,7 @@ class SparseComputation:
 
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
+        self.intervalLength = 1/ float(self.gridResolution)
 
     def _rescale_data(self, data):
         '''
@@ -44,7 +47,6 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
 
-        n = len(data[0])
         maximum = np.amax(data, axis=0, keepdims=True)
         minimum = np.amin(data, axis=0, keepdims=True)
 
@@ -71,7 +73,6 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError('Data should be a Numpy array')
 
-        n = len(data[0])
         result = {}
         for i in range(0, len(data)):
             box_id = tuple(data[i])
@@ -106,14 +107,14 @@ class SparseComputation:
             for increment in increments:
                 id_incremented = tuple(a + b
                                        for a, b
-                                       in zip(box_id, increment))
+                                       in six.moves.zip(box_id, increment))
                 if id_incremented in boxes_dict:
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]
                         )
         return pairs
 
-    def get_similar_indices(self, data, seed=None, **kwargs):
+    def get_similar_indices(self, data, seed=None):
         '''`get_similar_indices` computes the similar indices in the data and
         return a list of pairs
 
@@ -134,89 +135,96 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
 
-        reduced_data = self.dimReducer.fit_transform(data, seed)
+        if self.dimReducer is None:
+            reduced_data = data
+        else:
+            reduced_data = self.dimReducer.fit_transform(data, seed=seed)
         return self._get_pairs(reduced_data)
 
-class SparseShiftedComputation (SparseComputation):
+class SparseShiftedComputation(SparseComputation):
+    '''
+    Alternative technique to SparseComputation that avoids identifying
+    neighboring blocks
+    '''
 
-    def _getOffsets(self,nGrid,p):
+    @staticmethod
+    def _get_offsets(num_grids, num_dim):
         '''
         get offsets for each grid
         input: number of grids and number of dimensions
         output: np.array
         '''
         offsets = []
-        for i in range(nGrid):
-            ls = [int(i) for i in np.binary_repr(i, p)]
-            offsets.append(ls)
+        for i in range(num_grids):
+            offset = [int(j) for j in np.binary_repr(i, num_dim)]
+            offsets.append(offset)
         return np.array(offsets)
 
-    def _get_boxes(self,BoxID,ObjectID):
+    @staticmethod
+    def _get_boxes_of_grid(box_id, object_id):
         '''
         get for each box the objects that fall within
         input: vector of box ids (np.array), vector of object ids (np.array)
         output: list of lists
         '''
-        # Sort BoxID and ObjectID according to BoxID
-        idx = np.argsort(BoxID)
-        BoxID_sorted = BoxID[idx]
-        ObjectID_sorted = list(ObjectID[idx])
-        # Get positions (breakpoints) in vector where BoxID changes
-        difference = np.diff(BoxID_sorted)
+        # Sort box_id and object_id according to box_id
+        idx = np.argsort(box_id)
+        box_id_sorted = box_id[idx]
+        object_id_sorted = list(object_id[idx])
+        # Get positions (breakpoints) in vector where box_id changes
+        difference = np.diff(box_id_sorted)
         breakpoints = np.nonzero(difference)[0]
         # Get starting positions by incrementing breakpoints by 1
-        starting_positions = breakpoints + 1
+        start_pos = breakpoints + 1
         # Add first position in vector as starting position
-        starting_positions = np.insert(starting_positions,0,0)
+        start_pos = np.insert(start_pos, 0, 0)
         # Get number of objects in each box
-        nObjectsPerBox = np.diff(np.append(starting_positions,len(ObjectID_sorted)+1))
+        num_obj_per_box = np.diff(np.append(start_pos, len(object_id_sorted)+1))
         # Remove boxes which contain a single object
-        z = np.where(nObjectsPerBox==1)
-        starting_positions = np.delete(starting_positions,z)
-        nObjectsPerBox = np.delete(nObjectsPerBox,z)
+        idx = np.where(num_obj_per_box == 1)
+        start_pos = np.delete(start_pos, idx)
+        num_obj_per_box = np.delete(num_obj_per_box, idx)
         # Compute ending positions
-        ending_positions = starting_positions + nObjectsPerBox
-        numBoxes = len(starting_positions)
-        boxes = []
-        for i in range(numBoxes):
-            boxes.append(ObjectID_sorted[starting_positions[i]:ending_positions[i]])
+        end_pos = start_pos + num_obj_per_box
+        boxes = [object_id_sorted[x:y] for x, y in six.moves.zip(start_pos, end_pos)]
         return boxes
 
-    def _get_pairs_of_grid(self,data,offset):
+    def _get_coordinates(self, data, offset):
+        # Shift data
+        data = data + offset[np.newaxis, :]
+        # Get coordinates for each object
+        coordinates = data / float(self.intervalLength)
+        coordinates = coordinates.astype(int)
+        pos_idx = np.greater_equal(data, np.ones(data.shape))
+        close_idx = np.isclose(data, 1)
+        coordinates[np.logical_and(pos_idx, close_idx)] -= 1
+        return coordinates
+
+    def _get_pairs_of_grid(self, data, offset, object_id):
         '''`_get_pairs_of_grid` constructs a grid according to the specified
         offset returns all pairs of objects that lie within the same grid block
         input: data (np.array), offsets (np.array)
         output: list of pairs (list[(int,int)])
         '''
-        # Get object ids
-        ObjectID = np.array(list(range(len(data[:,0]))))
-        # Shift data
-        data = data + offset[np.newaxis,:]
-        # Get interval length
-        intervalLength = 1 / float(self.gridResolution)
-        # Get coordinates for each object
-        coordinates = np.floor(data / float(intervalLength))+1
-        coordinates = coordinates.astype(int)
-        coordinates[data==1] -= 1
-        coordinates -= 1
+        coordinates = self._get_coordinates(data, offset)
         # Remove objects that fall out of the grid
-        idx = np.where(coordinates>self.gridResolution-1)
-        coordinates = np.delete(coordinates,idx[0],0)
-        ObjectID = np.delete(ObjectID,idx[0],0)
-        # Convert coordinates to BoxIDs
-        p = len(data[0])
-        dims = tuple([self.gridResolution for i in range(p)])
-        BoxID = np.ravel_multi_index(np.transpose(coordinates),dims)
+        idx = np.where(coordinates > self.gridResolution-1)
+        coordinates = np.delete(coordinates, idx[0], 0)
+        object_id = np.delete(object_id, idx[0], 0)
+        # Convert coordinates to box_ids
+        num_dim = len(data[0])
+        dims = tuple([self.gridResolution for i in range(num_dim)])
+        box_id = np.ravel_multi_index(np.transpose(coordinates), dims)
         # Get objects that fall within each box
-        boxes = self._get_boxes(BoxID,ObjectID)
+        boxes = SparseShiftedComputation._get_boxes_of_grid(box_id, object_id)
         # Construct pairs
         pairs = []
         for box in boxes:
             box.sort()
-            pairs += itertools.combinations(box,2)
+            pairs += itertools.combinations(box, 2)
         return pairs
 
-    def get_similar_indices(self, data, seed=None):
+    def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data
 
@@ -232,18 +240,130 @@ class SparseShiftedComputation (SparseComputation):
             (list [(int, int)]): list of pairs. Each pair contains indices of
                                  objects that are similar
         '''
-        reduced_data = self.dimReducer.fit_transform(data, seed)
-        p = len(reduced_data[0])
-        nGrids = 2**p
-        offsets = self._getOffsets(nGrids,p)
+        if 'normalize' in [key for key in kwargs]:
+            normalize = kwargs['normalize']
+        else:
+            normalize = True
+
+        if self.dimReducer is None:
+            reduced_data = data
+        else:
+            reduced_data = self.dimReducer.fit_transform(data, seed=seed)
+        num_dim = len(reduced_data[0])
+        num_grids = 2**num_dim
+        offsets = SparseShiftedComputation._get_offsets(num_grids, num_dim)
         # Normalize reduced data
-        min_max_scaler = preprocessing.MinMaxScaler()
-        normalized_data = min_max_scaler.fit_transform(reduced_data)
+        if normalize:
+            min_max_scaler = preprocessing.MinMaxScaler()
+            normalized_data = min_max_scaler.fit_transform(reduced_data)
+        else:
+            normalized_data = reduced_data
         # Compute offsets
-        intervalLength = 1/ float(self.gridResolution)
-        offsets = offsets*(intervalLength / 2.0)
+        offsets = offsets*(self.intervalLength / 2.0)
+        # Get object ids
+        object_id = np.arange(len(data[:, 0]))
         # Determine pairs
         pairs = []
         for offset in offsets:
-            pairs = pairs + self._get_pairs_of_grid(normalized_data,offset)
+            pairs = pairs + self._get_pairs_of_grid(normalized_data,
+                                                    offset, object_id)
         return set(pairs)
+
+class SparseHybridComputation(SparseComputation):
+    '''
+    Combination of SparseComputation and SparseShiftedComputation
+    '''
+
+    @staticmethod
+    def _get_start_positions(breakpoints):
+        start_pos = breakpoints + 1
+        start_pos = np.insert(start_pos, 0, 0)
+        return start_pos
+
+    @staticmethod
+    def _get_baseline_boxes(coordinates, box_id, object_id):
+        '''
+        get for each box the objects that fall within
+        input: vector of box ids (np.array), vector of object ids (np.array)
+        output: list of lists
+        '''
+        # Sort box_id and object_id according to box_id
+        idx = np.argsort(box_id)
+        box_id_sorted = box_id[idx]
+        object_id_sorted = list(object_id[idx])
+        coordinates_sorted = coordinates[idx]
+        # Get positions (breakpoints) in vector where box_id changes
+        difference = np.diff(box_id_sorted)
+        breakpoints = np.nonzero(difference)[0]
+        # Get unique coordinates based on breakpoints
+        unique_coordinates = coordinates_sorted[breakpoints]
+        unique_coordinates = np.append(unique_coordinates,
+                                       np.array([coordinates_sorted[-1]]),
+                                       axis=0)
+        # Get starting positions by incrementing breakpoints by 1
+        start_pos = SparseHybridComputation._get_start_positions(breakpoints)
+        # Get number of objects in each box
+        num_obj_per_box = np.diff(np.append(start_pos, len(object_id_sorted)+1))
+        # Compute ending positions
+        end_pos = start_pos + num_obj_per_box
+        boxes = [object_id_sorted[x:y] for x, y in six.moves.zip(start_pos, end_pos)]
+        return [boxes, unique_coordinates]
+
+    def _convert_coordinates_to_ids(self, coordinates, num_dim):
+        dims = tuple([self.gridResolution for i in range(num_dim)])
+        return np.ravel_multi_index(np.transpose(coordinates), dims)
+
+    def _apply_shifted_grid(self, boxes, unique_coordinates):
+        self.gridResolution = int(self.gridResolution/float(2))
+        self.intervalLength = 1/ float(self.gridResolution)
+        ssc = SparseShiftedComputation(dimReducer=None,
+                                       gridResolution=self.gridResolution)
+        normalized_data = unique_coordinates/np.amax(unique_coordinates,
+                                                     axis=0, keepdims=True)
+        comparisons = ssc.get_similar_indices(normalized_data, normalize=False)
+        # Get pairs
+        pairs = []
+        for comparison in comparisons:
+            pairs += itertools.product(boxes[comparison[0]],
+                                       boxes[comparison[1]])
+        for box in boxes:
+            pairs += itertools.combinations(box, 2)
+        return pairs
+
+    def get_similar_indices(self, data, seed=None):
+        '''`get_similar_indices` uses a combination of shifted grids and sparse
+        computation to find pairs of similar objects in the data
+
+        `get_similar_indices` first projects the (high-dimensional) data set
+        onto a low-dimensional space using the `DimReducer`. Then a base grid is
+        created to determine some groups of objects. A new data set is created
+        where the objects represent the groups of the previous step and the features
+        are the coordinates of the groups in the base grid. Then, shifted grid
+        is applied to find pairs of neighboring groups. All pairs of objects within
+        groups and between neighboring groups are returned.
+
+        Args:
+            data (numpy.ndarray): input data with n rows (objects) and p
+                                  columns (features)
+        Returns:
+            (list [(int, int)]): list of pairs. Each pair contains indices of
+                                 objects that are similar
+        '''
+        if self.dimReducer is None:
+            reduced_data = data
+        else:
+            reduced_data = self.dimReducer.fit_transform(data, seed=seed)
+        num_dim = len(reduced_data[0])
+        # Multiply grid resolution by 2
+        self.gridResolution = self.gridResolution*2
+        self.intervalLength = 1/ float(self.gridResolution)
+        # Get box-coordinates for each object
+        object_id = np.arange(len(data[:, 0]))
+        coordinates = self._rescale_data(reduced_data)
+        # Get objects that fall within each box
+        box_id = self._convert_coordinates_to_ids(coordinates, num_dim)
+        output = self._get_baseline_boxes(coordinates, box_id, object_id)
+        boxes = output[0]
+        unique_coordinates = output[1]
+        # Apply shifted grid
+        return self._apply_shifted_grid(boxes, unique_coordinates)

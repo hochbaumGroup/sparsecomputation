@@ -3,8 +3,6 @@ import six.moves
 import numpy as np
 from sklearn import preprocessing
 
-# To ignore numpy errors:
-#     pylint: disable=E1101
 
 class SparseComputation:
 
@@ -81,7 +79,7 @@ class SparseComputation:
             result[box_id].append(i)
         return result
 
-    def _get_pairs(self, data):
+    def _get_pairs(self, data,statistics=False):
         '''
         get reduced dimension data returns a list of one way pairs for
         similarities to be computed
@@ -91,9 +89,16 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError
 
+        if statistics:
+            statistics_dict = {}
+            num_boxes = 0
+            num_neighbors = 0
+            num_nonempty_neighbors = 0
+
         n = len(data[0])
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
+        if statistics: num_boxes = len(boxes_dict)
         pairs = []
 
         increments = tuple(increment
@@ -108,13 +113,23 @@ class SparseComputation:
                 id_incremented = tuple(a + b
                                        for a, b
                                        in six.moves.zip(box_id, increment))
+                if statistics: num_neighbors += 1
                 if id_incremented in boxes_dict:
+                    if statistics: num_nonempty_neighbors += 1
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]
                         )
-        return pairs
+        if statistics:
+            statistics_dict['num_boxes'] = num_boxes
+            statistics_dict['num_neighbors'] = num_neighbors
+            statistics_dict['num_nonempty_neighbors'] = num_nonempty_neighbors
+            statistics_dict['num_empty_neighbors'] = num_neighbors-num_nonempty_neighbors
+            output = {'pairs': pairs,'statistics': statistics_dict}
+            return output
+        else:
+            return pairs
 
-    def get_similar_indices(self, data, seed=None):
+    def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` computes the similar indices in the data and
         return a list of pairs
 
@@ -135,11 +150,16 @@ class SparseComputation:
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
 
+        if 'statistics' in [key for key in kwargs]:
+            statistics = kwargs['statistics']
+        else:
+            statistics = False
+
         if self.dimReducer is None:
             reduced_data = data
         else:
             reduced_data = self.dimReducer.fit_transform(data, seed=seed)
-        return self._get_pairs(reduced_data)
+        return self._get_pairs(reduced_data,statistics=statistics)
 
 class SparseShiftedComputation(SparseComputation):
     '''

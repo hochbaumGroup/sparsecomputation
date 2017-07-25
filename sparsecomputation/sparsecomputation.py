@@ -122,15 +122,14 @@ class SparseComputation:
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]
                         )
+        output = {'pairs': pairs}
         if statistics:
             statistics_dict['num_boxes'] = num_boxes
             statistics_dict['num_neighbors'] = num_neighbors
             statistics_dict['num_nonempty_neighbors'] = num_nonempty_neighbors
             statistics_dict['num_empty_neighbors'] = num_neighbors-num_nonempty_neighbors
-            output = {'pairs': pairs,'statistics': statistics_dict}
-            return output
-        else:
-            return pairs
+            output['statistics'] = statistics_dict
+        return output
 
     def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` computes the similar indices in the data and
@@ -147,13 +146,12 @@ class SparseComputation:
                                   observations, each line having p features.
 
         Keyword arguments:
-            statistics (bool):    if true, function returns dictionary that
-                                  contains pairs and a dictionary with statistics
+            statistics (bool):    if true, dictionary with statistics is added
+                                  to output
 
         Returns:
-            (list [(int, int)]): list of directed pairs. This mean that if `i`
-                                 is similar to `j` both pairs `(i, j)` and
-                                 `(j, i)` are returned in the list
+            dictionary:          contains list of pairs and (if statistics
+                                 is true) also a dictionary of statistics
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
@@ -290,12 +288,12 @@ class SparseShiftedComputation(SparseComputation):
                                   columns (features)
 
         Keyword arguments:
-            statistics (bool):    if true, function returns dictionary that
-                                  contains pairs and a dictionary with statistics
+            statistics (bool):    if true, dictionary with statistics is added
+                                  to output
 
         Returns:
-            (list [(int, int)]): list of pairs. Each pair contains indices of
-                                 objects that are similar
+            dictionary:          contains list of pairs and (if statistics
+                                 is true) also a dictionary of statistics
         '''
 
         if not isinstance(data, np.ndarray):
@@ -339,14 +337,14 @@ class SparseShiftedComputation(SparseComputation):
             pairs = pairs + self._get_pairs_of_grid(normalized_data,
                                                     offset, object_id)
         if statistics:
-            final_pairs = set(pairs)
+            num_pairs = len(pairs)
+            output = {'pairs': set(pairs)}
             statistics_dict = {}
-            statistics_dict['num_duplicate_pairs'] = len(pairs)-len(final_pairs)
-            output = {'pairs': final_pairs, 'statistics': statistics_dict}
-            return output
+            statistics_dict['num_duplicate_pairs'] = num_pairs-len(output['pairs'])
+            output['statistics'] = statistics_dict
         else:
-            # Return unique pairs
-            return set(pairs)
+            output = {'pairs': set(pairs)}
+        return output
 
 class SparseHybridComputation(SparseShiftedComputation):
     '''
@@ -402,27 +400,20 @@ class SparseHybridComputation(SparseShiftedComputation):
                                        gridResolution=self.gridResolution)
         normalized_data = unique_coordinates/np.amax(unique_coordinates,
                                                      axis=0, keepdims=True)
-        output = ssc.get_similar_indices(normalized_data, normalize=False,
+        output_ssc = ssc.get_similar_indices(normalized_data, normalize=False,
                                               statistics=statistics)
-        if statistics:
-            statistics_dict = output['statistics']
-            comparisons = output['pairs']
-        else:
-            comparisons = output
 
-        # Get pairs
         pairs = []
-        for comparison in comparisons:
+        for comparison in output_ssc['pairs']:
             pairs += itertools.product(boxes[comparison[0]],
                                        boxes[comparison[1]])
         for box in boxes:
             pairs += itertools.combinations(box, 2)
 
+        output = {'pairs': pairs}
         if statistics:
-            output = {'pairs': pairs, 'statistics': statistics_dict}
-            return output
-        else:
-            return pairs
+            output['statistics'] = output_ssc['statistics']
+        return output
 
     def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` uses a combination of shifted grids and sparse
@@ -441,12 +432,12 @@ class SparseHybridComputation(SparseShiftedComputation):
                                   columns (features)
 
         Keyword arguments:
-            statistics (bool):    if true, function returns dictionary that
-                                  contains pairs and a dictionary with statistics
+            statistics (bool):    if true, dictionary with statistics is added
+                                  to output
 
         Returns:
-            (list [(int, int)]): list of pairs. Each pair contains indices of
-                                 objects that are similar
+            dictionary:          contains list of pairs and (if statistics
+                                 is true) also a dictionary of statistics
         '''
 
         if 'statistics' in [key for key in kwargs]:

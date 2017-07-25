@@ -285,6 +285,11 @@ class SparseShiftedComputation(SparseComputation):
         Args:
             data (numpy.ndarray): input data with n rows (objects) and p
                                   columns (features)
+
+        Keyword arguments:
+            statistics (bool):    if true, function returns dictionary that
+                                  contains pairs and a dictionary with statistics
+
         Returns:
             (list [(int, int)]): list of pairs. Each pair contains indices of
                                  objects that are similar
@@ -297,6 +302,11 @@ class SparseShiftedComputation(SparseComputation):
             normalize = kwargs['normalize']
         else:
             normalize = True
+
+        if 'statistics' in [key for key in kwargs]:
+            statistics = kwargs['statistics']
+        else:
+            statistics = False
 
         # Reduce dimensionality of data only if a dimReducer is provided
         if self.dimReducer is None:
@@ -325,8 +335,15 @@ class SparseShiftedComputation(SparseComputation):
         for offset in offsets:
             pairs = pairs + self._get_pairs_of_grid(normalized_data,
                                                     offset, object_id)
-        # Return unique pairs
-        return set(pairs)
+        if statistics:
+            final_pairs  = set(pairs)
+            statistics_dict = {}
+            statistics_dict['num_duplicate_pairs'] = len(pairs)-len(final_pairs)
+            output = {'pairs': final_pairs,'statistics': statistics_dict}
+            return output
+        else:
+            # Return unique pairs
+            return set(pairs)
 
 class SparseHybridComputation(SparseShiftedComputation):
     '''

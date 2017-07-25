@@ -79,7 +79,7 @@ class SparseComputation:
             result[box_id].append(i)
         return result
 
-    def _get_pairs(self, data,statistics=False):
+    def _get_pairs(self, data, statistics=False):
         '''
         get reduced dimension data returns a list of one way pairs for
         similarities to be computed
@@ -98,7 +98,8 @@ class SparseComputation:
         n = len(data[0])
         rescaled_data = self._rescale_data(data)
         boxes_dict = self._get_boxes(rescaled_data)
-        if statistics: num_boxes = len(boxes_dict)
+        if statistics:
+            num_boxes = len(boxes_dict)
         pairs = []
 
         increments = tuple(increment
@@ -113,9 +114,11 @@ class SparseComputation:
                 id_incremented = tuple(a + b
                                        for a, b
                                        in six.moves.zip(box_id, increment))
-                if statistics: num_neighbors += 1
+                if statistics:
+                    num_neighbors += 1
                 if id_incremented in boxes_dict:
-                    if statistics: num_nonempty_neighbors += 1
+                    if statistics:
+                        num_nonempty_neighbors += 1
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]
                         )
@@ -164,7 +167,7 @@ class SparseComputation:
             reduced_data = data
         else:
             reduced_data = self.dimReducer.fit_transform(data, seed=seed)
-        return self._get_pairs(reduced_data,statistics=statistics)
+        return self._get_pairs(reduced_data, statistics=statistics)
 
 class SparseShiftedComputation(SparseComputation):
     '''
@@ -336,10 +339,10 @@ class SparseShiftedComputation(SparseComputation):
             pairs = pairs + self._get_pairs_of_grid(normalized_data,
                                                     offset, object_id)
         if statistics:
-            final_pairs  = set(pairs)
+            final_pairs = set(pairs)
             statistics_dict = {}
             statistics_dict['num_duplicate_pairs'] = len(pairs)-len(final_pairs)
-            output = {'pairs': final_pairs,'statistics': statistics_dict}
+            output = {'pairs': final_pairs, 'statistics': statistics_dict}
             return output
         else:
             # Return unique pairs
@@ -382,13 +385,16 @@ class SparseHybridComputation(SparseShiftedComputation):
         boxes = [object_id_sorted[x:y] for x, y in six.moves.zip(start_pos, end_pos)]
         return [boxes, unique_coordinates]
 
-    def _apply_shifted_grid(self, boxes, unique_coordinates):
+    def _apply_shifted_grid(self, boxes, unique_coordinates, statistics=False):
         '''
         apply shifted grid to unique_coordinates and return pairs of boxes
-        that are neighbors
-        input: list of boxes, numpy.ndarray of corresponding coordinates
+        that are neighbors. If argument statistics is true, then the function
+        returns a dictionary that contains the pairs and a dictionary of
+        statistics
+        input: list of boxes, numpy.ndarray of corresponding coordinates,
+               boolean statistics
         output: list of pairs. Each pair contains indices of objects that
-                are similar
+                are similar, dictionary with statistics if statistics is true
         '''
         self.gridResolution = int(self.gridResolution/float(2))
         self.intervalLength = 1/ float(self.gridResolution)
@@ -396,7 +402,14 @@ class SparseHybridComputation(SparseShiftedComputation):
                                        gridResolution=self.gridResolution)
         normalized_data = unique_coordinates/np.amax(unique_coordinates,
                                                      axis=0, keepdims=True)
-        comparisons = ssc.get_similar_indices(normalized_data, normalize=False)
+        output = ssc.get_similar_indices(normalized_data, normalize=False,
+                                              statistics=statistics)
+        if statistics:
+            statistics_dict = output['statistics']
+            comparisons = output['pairs']
+        else:
+            comparisons = output
+
         # Get pairs
         pairs = []
         for comparison in comparisons:
@@ -404,9 +417,14 @@ class SparseHybridComputation(SparseShiftedComputation):
                                        boxes[comparison[1]])
         for box in boxes:
             pairs += itertools.combinations(box, 2)
-        return pairs
 
-    def get_similar_indices(self, data, seed=None):
+        if statistics:
+            output = {'pairs': pairs, 'statistics': statistics_dict}
+            return output
+        else:
+            return pairs
+
+    def get_similar_indices(self, data, seed=None, **kwargs):
         '''`get_similar_indices` uses a combination of shifted grids and sparse
         computation to find pairs of similar objects in the data
 
@@ -421,10 +439,21 @@ class SparseHybridComputation(SparseShiftedComputation):
         Args:
             data (numpy.ndarray): input data with n rows (objects) and p
                                   columns (features)
+
+        Keyword arguments:
+            statistics (bool):    if true, function returns dictionary that
+                                  contains pairs and a dictionary with statistics
+
         Returns:
             (list [(int, int)]): list of pairs. Each pair contains indices of
                                  objects that are similar
         '''
+
+        if 'statistics' in [key for key in kwargs]:
+            statistics = kwargs['statistics']
+        else:
+            statistics = False
+
         if self.dimReducer is None:
             reduced_data = data
         else:
@@ -442,4 +471,5 @@ class SparseHybridComputation(SparseShiftedComputation):
         boxes = output[0]
         unique_coordinates = output[1]
         # Apply shifted grid
-        return self._apply_shifted_grid(boxes, unique_coordinates)
+        return self._apply_shifted_grid(boxes, unique_coordinates,
+                                        statistics=statistics)

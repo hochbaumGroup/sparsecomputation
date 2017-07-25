@@ -37,27 +37,27 @@ class TestSparseComputation(unittest.TestCase):
 
     def test_get_pairs(self):
         self.assertRaises(TypeError, self.b._get_pairs, [])
-        pairs = self.b._get_pairs(self.data)
+        output = self.b._get_pairs(self.data)
         expected_pairs = [(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
                                   (4, 1), (4, 3), (4, 2), (1, 3), (3, 2)]
-        six.assertCountEqual(self, pairs, expected_pairs)
+        six.assertCountEqual(self, output['pairs'], expected_pairs)
 
     def test_get_pairs_same_box(self):
-        pairs = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
+        output = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
         expected_pairs = [(0, 1)]
-        six.assertCountEqual(self, pairs, expected_pairs)
-        
+        six.assertCountEqual(self, output['pairs'], expected_pairs)
+
 class TestSparseShiftedComputation(unittest.TestCase):
-    
+
     def setUp(self):
         self.gridResolution = 3
         self.dimReducer = DimReducer(2)
         self.b = SparseShiftedComputation(self.dimReducer, self.gridResolution)
-        self.data = np.array([[-1, -5], [-0.5,-4.5], [-0.5, -3.5], [0,-3], 
+        self.data = np.array([[-1, -5], [-0.5,-4.5], [-0.5, -3.5], [0,-3],
                               [-0.5,-2.5], [1.5,-4.5], [1.5,-2.5], [2,-2]])
     def test_ssc_init(self):
         self.assertEqual(self.b.gridResolution, self.gridResolution)
-        self.assertRaises(TypeError, SparseShiftedComputation, 
+        self.assertRaises(TypeError, SparseShiftedComputation,
                           self.dimReducer, '1')
-        self.assertRaises(ValueError, SparseShiftedComputation, 
+        self.assertRaises(ValueError, SparseShiftedComputation,
                           self.dimReducer, 0)

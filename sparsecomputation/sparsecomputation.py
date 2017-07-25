@@ -142,6 +142,11 @@ class SparseComputation:
             data (numpy.ndarray): input data that needs to be spasified
                                   data should be a table of n lines being n
                                   observations, each line having p features.
+
+        Keyword arguments:
+            statistics (bool):    if true, function returns dictionary that
+                                  contains pairs and a dictionary with statistics
+
         Returns:
             (list [(int, int)]): list of directed pairs. This mean that if `i`
                                  is similar to `j` both pairs `(i, j)` and

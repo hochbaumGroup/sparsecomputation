@@ -35,6 +35,7 @@ class SparseComputation:
         self.dimReducer = dimReducer
         self.gridResolution = gridResolution
         self.intervalLength = 1/ float(self.gridResolution)
+        self.stats = []
 
     def _rescale_data(self, data):
         '''
@@ -122,16 +123,16 @@ class SparseComputation:
                     pairs += itertools.product(
                         boxes_dict[box_id], boxes_dict[id_incremented]
                         )
-        output = {'pairs': pairs}
+
         if statistics:
             statistics_dict['num_boxes'] = num_boxes
             statistics_dict['num_neighbors'] = num_neighbors
             statistics_dict['num_nonempty_neighbors'] = num_nonempty_neighbors
             statistics_dict['num_empty_neighbors'] = num_neighbors-num_nonempty_neighbors
-            output['statistics'] = statistics_dict
-        return output
+            self.stats = statistics_dict
+        return pairs
 
-    def get_similar_indices(self, data, seed=None, **kwargs):
+    def get_similar_indices(self, data, seed=None, statistics=False):
         '''`get_similar_indices` computes the similar indices in the data and
         return a list of pairs
 
@@ -155,11 +156,6 @@ class SparseComputation:
         '''
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
-
-        if 'statistics' in [key for key in kwargs]:
-            statistics = kwargs['statistics']
-        else:
-            statistics = False
 
         if self.dimReducer is None:
             reduced_data = data
@@ -274,7 +270,8 @@ class SparseShiftedComputation(SparseComputation):
             pairs += itertools.combinations(box, 2)
         return pairs
 
-    def get_similar_indices(self, data, seed=None, **kwargs):
+    def get_similar_indices(self, data, seed=None, normalize=True,
+                            statistics=False):
         '''`get_similar_indices` uses a set of shifted grids to find pairs of
         similar objects in the data
 
@@ -298,16 +295,6 @@ class SparseShiftedComputation(SparseComputation):
 
         if not isinstance(data, np.ndarray):
             raise TypeError('data should be a numpy array')
-
-        if 'normalize' in [key for key in kwargs]:
-            normalize = kwargs['normalize']
-        else:
-            normalize = True
-
-        if 'statistics' in [key for key in kwargs]:
-            statistics = kwargs['statistics']
-        else:
-            statistics = False
 
         # Reduce dimensionality of data only if a dimReducer is provided
         if self.dimReducer is None:
@@ -338,13 +325,14 @@ class SparseShiftedComputation(SparseComputation):
                                                     offset, object_id)
         if statistics:
             num_pairs = len(pairs)
-            output = {'pairs': set(pairs)}
+            pairs = set(pairs)
             statistics_dict = {}
-            statistics_dict['num_duplicate_pairs'] = num_pairs-len(output['pairs'])
-            output['statistics'] = statistics_dict
+            statistics_dict['num_duplicate_pairs'] = num_pairs-len(pairs)
+            self.stats = statistics_dict
+            return pairs
         else:
-            output = {'pairs': set(pairs)}
-        return output
+            return set(pairs)
+
 
 class SparseHybridComputation(SparseShiftedComputation):
     '''
@@ -400,22 +388,21 @@ class SparseHybridComputation(SparseShiftedComputation):
                                        gridResolution=self.gridResolution)
         normalized_data = unique_coordinates/np.amax(unique_coordinates,
                                                      axis=0, keepdims=True).astype(float)
-        output_ssc = ssc.get_similar_indices(normalized_data, normalize=False,
+        comparisons = ssc.get_similar_indices(normalized_data, normalize=False,
                                               statistics=statistics)
 
         pairs = []
-        for comparison in output_ssc['pairs']:
+        for comparison in comparisons:
             pairs += itertools.product(boxes[comparison[0]],
                                        boxes[comparison[1]])
         for box in boxes:
             pairs += itertools.combinations(box, 2)
 
-        output = {'pairs': pairs}
         if statistics:
-            output['statistics'] = output_ssc['statistics']
-        return output
+            self.stats = ssc.stats
+        return pairs
 
-    def get_similar_indices(self, data, seed=None, **kwargs):
+    def get_similar_indices(self, data, seed=None, statistics=False):
         '''`get_similar_indices` uses a combination of shifted grids and sparse
         computation to find pairs of similar objects in the data
 
@@ -439,11 +426,6 @@ class SparseHybridComputation(SparseShiftedComputation):
             dictionary:          contains list of pairs and (if statistics
                                  is true) also a dictionary of statistics
         '''
-
-        if 'statistics' in [key for key in kwargs]:
-            statistics = kwargs['statistics']
-        else:
-            statistics = False
 
         if self.dimReducer is None:
             reduced_data = data

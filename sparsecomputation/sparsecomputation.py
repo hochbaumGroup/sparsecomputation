@@ -395,11 +395,11 @@ class SparseHybridComputation(SparseShiftedComputation):
                 are similar, dictionary with statistics if statistics is true
         '''
         self.gridResolution = int(self.gridResolution/float(2))
-        self.intervalLength = 1/ float(self.gridResolution)
+        self.intervalLength = 1/float(self.gridResolution)
         ssc = SparseShiftedComputation(dimReducer=None,
                                        gridResolution=self.gridResolution)
-        normalized_data = np.divide(unique_coordinates,np.amax(unique_coordinates,
-                                                     axis=0, keepdims=True))
+        normalized_data = unique_coordinates/np.amax(unique_coordinates,
+                                                     axis=0, keepdims=True).astype(float)
         output_ssc = ssc.get_similar_indices(normalized_data, normalize=False,
                                               statistics=statistics)
 

@@ -37,15 +37,15 @@ class TestSparseComputation(unittest.TestCase):
 
     def test_get_pairs(self):
         self.assertRaises(TypeError, self.b._get_pairs, [])
-        output = self.b._get_pairs(self.data)
+        pairs = self.b._get_pairs(self.data)
         expected_pairs = [(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
                                   (4, 1), (4, 3), (4, 2), (1, 3), (3, 2)]
-        six.assertCountEqual(self, output['pairs'], expected_pairs)
+        six.assertCountEqual(self, pairs, expected_pairs)
 
     def test_get_pairs_same_box(self):
-        output = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
+        pairs = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
         expected_pairs = [(0, 1)]
-        six.assertCountEqual(self, output['pairs'], expected_pairs)
+        six.assertCountEqual(self, pairs, expected_pairs)
 
 class TestSparseShiftedComputation(unittest.TestCase):
 
@@ -66,9 +66,9 @@ class TestSparseShiftedComputation(unittest.TestCase):
                         [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
 
     def test_ssc_output(self):
-        output_sc = self.sc.get_similar_indices(self.data)
-        output_ssc = self.ssc.get_similar_indices(self.data)
-        self.assertEqual(len(output_sc['pairs']), len(output_ssc['pairs']))
+        pairs_sc = self.sc.get_similar_indices(self.data)
+        pairs_ssc = self.ssc.get_similar_indices(self.data)
+        self.assertEqual(len(pairs_sc), len(pairs_ssc))
 
 class TestSparseHybridComputation(unittest.TestCase):
 
@@ -90,8 +90,8 @@ class TestSparseHybridComputation(unittest.TestCase):
                         [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
 
     def test_shc_output(self):
-        output_sc = self.sc.get_similar_indices(self.data)
-        output_ssc = self.ssc.get_similar_indices(self.data)
-        output_shc = self.shc.get_similar_indices(self.data)
-        self.assertEqual(len(output_sc['pairs']), len(output_shc['pairs']))
-        self.assertEqual(len(output_ssc['pairs']), len(output_shc['pairs']))
+        pairs_sc = self.sc.get_similar_indices(self.data)
+        pairs_ssc = self.ssc.get_similar_indices(self.data)
+        pairs_shc = self.shc.get_similar_indices(self.data)
+        self.assertEqual(len(pairs_sc), len(pairs_shc))
+        self.assertEqual(len(pairs_ssc), len(pairs_shc))

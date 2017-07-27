@@ -398,8 +398,8 @@ class SparseHybridComputation(SparseShiftedComputation):
         self.intervalLength = 1/ float(self.gridResolution)
         ssc = SparseShiftedComputation(dimReducer=None,
                                        gridResolution=self.gridResolution)
-        normalized_data = unique_coordinates/np.amax(unique_coordinates,
-                                                     axis=0, keepdims=True)
+        normalized_data = unique_coordinates/float(np.amax(unique_coordinates,
+                                                     axis=0, keepdims=True))
         output_ssc = ssc.get_similar_indices(normalized_data, normalize=False,
                                               statistics=statistics)
 

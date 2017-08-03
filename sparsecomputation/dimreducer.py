@@ -160,10 +160,13 @@ class ApproximatePCA(DimReducer):
         n = len(data[0])
         n_col = max(self.minCol, n*self.fracCol)
         n_col = int(min(n_col, len(data[0])))
-        list_col = np.random.choice(range(n), n_col, 0, proba_col)
-        factor = np.sqrt(np.array(proba_col)[list_col]*n_col)
-        result = np.copy(data[:, list_col])/factor
-        return result
+        if n_col<n:
+            list_col = np.random.choice(range(n), n_col, 0, proba_col)
+            factor = np.sqrt(np.array(proba_col)[list_col]*n_col)
+            result = np.copy(data[:, list_col])/factor
+            return result
+        else:
+            return data
 
     def _row_reduction(self, data):
         '''

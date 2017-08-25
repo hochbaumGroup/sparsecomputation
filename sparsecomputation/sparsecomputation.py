@@ -163,7 +163,7 @@ class SparseComputation:
             reduced_data = self.dimReducer.fit_transform(data, seed=seed)
         return self._get_pairs(reduced_data, statistics=statistics)
 
-class SparseShiftedComputation(SparseComputation):
+class SparseComputationObjectShifting(SparseComputation):
     '''
     Alternative technique to SparseComputation that avoids identifying
     neighboring blocks
@@ -209,7 +209,7 @@ class SparseShiftedComputation(SparseComputation):
         difference = np.diff(box_id_sorted)
         breakpoints = np.nonzero(difference)[0]
         # Get starting positions based on breakpoints
-        start_pos = SparseShiftedComputation._get_start_positions(breakpoints)
+        start_pos = SparseComputationObjectShifting._get_start_positions(breakpoints)
         # Get number of objects in each box
         num_obj_per_box = np.diff(np.append(start_pos, len(object_id_sorted)+1))
         # Remove boxes which contain a single object
@@ -262,7 +262,7 @@ class SparseShiftedComputation(SparseComputation):
         num_dim = len(data[0])
         box_id = self._convert_coordinates_to_ids(coordinates, num_dim)
         # Get objects that fall within each box
-        boxes = SparseShiftedComputation._get_boxes_of_grid(box_id, object_id)
+        boxes = SparseComputationObjectShifting._get_boxes_of_grid(box_id, object_id)
         # Construct pairs
         pairs = []
         for box in boxes:
@@ -307,7 +307,7 @@ class SparseShiftedComputation(SparseComputation):
         # Get number of grids required
         num_grids = 2**num_dim
         # Compute offset for each grid
-        offsets = SparseShiftedComputation._get_offsets(num_grids, num_dim)
+        offsets = SparseComputationObjectShifting._get_offsets(num_grids, num_dim)
         # Normalize reduced data if required
         if normalize:
             min_max_scaler = preprocessing.MinMaxScaler()
@@ -334,9 +334,9 @@ class SparseShiftedComputation(SparseComputation):
             return set(pairs)
 
 
-class SparseHybridComputation(SparseShiftedComputation):
+class SparseComputationBlockShifting(SparseComputationObjectShifting):
     '''
-    Combination of SparseComputation and SparseShiftedComputation
+    Combination of SparseComputation and SparseComputationObjectShifting
     '''
 
     @staticmethod
@@ -363,7 +363,7 @@ class SparseHybridComputation(SparseShiftedComputation):
                                        np.array([coordinates_sorted[-1]]),
                                        axis=0)
         # Get starting positions by incrementing breakpoints by 1
-        start_pos = SparseHybridComputation._get_start_positions(breakpoints)
+        start_pos = SparseComputationBlockShifting._get_start_positions(breakpoints)
         # Get number of objects in each box
         num_obj_per_box = np.diff(np.append(start_pos, len(object_id_sorted)+1))
         # Compute ending positions
@@ -384,7 +384,7 @@ class SparseHybridComputation(SparseShiftedComputation):
         '''
         self.gridResolution = int(self.gridResolution/float(2))
         self.intervalLength = 1/float(self.gridResolution)
-        ssc = SparseShiftedComputation(dimReducer=None,
+        ssc = SparseComputationObjectShifting(dimReducer=None,
                                        gridResolution=self.gridResolution)
         normalized_data = unique_coordinates/np.amax(unique_coordinates,
                                                      axis=0, keepdims=True).astype(float)

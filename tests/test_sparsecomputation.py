@@ -3,7 +3,7 @@ import unittest
 import sys
 import six
 import os
-from sparsecomputation import SparseComputation, SparseShiftedComputation, SparseHybridComputation
+from sparsecomputation import SparseComputation, SparseComputationObjectShifting, SparseComputationBlockShifting
 from sparsecomputation.dimreducer import DimReducer, PCA
 
 
@@ -47,13 +47,36 @@ class TestSparseComputation(unittest.TestCase):
         expected_pairs = [(0, 1)]
         six.assertCountEqual(self, pairs, expected_pairs)
 
-class TestSparseShiftedComputation(unittest.TestCase):
+class TestSparseComputationBlockShifting(unittest.TestCase):
 
     def setUp(self):
         self.gridResolution = 3
         self.dimReducer = PCA(3)
         self.sc = SparseComputation(self.dimReducer, self.gridResolution*2)
-        self.ssc = SparseShiftedComputation(self.dimReducer, self.gridResolution)
+        self.shc = SparseComputationBlockShifting(self.dimReducer, self.gridResolution)
+        self.data = np.array([[3, 5, 2, 8, 4, 4, 2, -10, 8, -2],
+                        [8, 2, -6, 9, 5, 6, 6, 2, 9, -7],
+                        [1, -1, -6, 0, 1, -7, -6, 6, 0, 2],
+                        [8, 5, 8, 1, 1, 7, 2, 4, -7, -9],
+                        [-10, 10, 2, 5, -7, -10, -6, -3, 7, -4],
+                        [-6, -10, -8, 2, 2, 0, 4, 7, 9, -4],
+                        [-6, 9, 5, 4, 6, -3, 8, -10, 4, 2],
+                        [6, -8, -5, 4, -4, -1, -2, 5, 8, 6],
+                        [10, -2, 8, 9, -4, -8, 7, 10, -7, 0],
+                        [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
+
+    def test_shc_output(self):
+        pairs_sc = self.sc.get_similar_indices(self.data)
+        pairs_shc = self.shc.get_similar_indices(self.data)
+        self.assertEqual(len(pairs_sc), len(pairs_shc))
+
+class TestSparseComputationObjectShifting(unittest.TestCase):
+
+    def setUp(self):
+        self.gridResolution = 3
+        self.dimReducer = PCA(3)
+        self.sc = SparseComputation(self.dimReducer, self.gridResolution*2)
+        self.ssc = SparseComputationObjectShifting(self.dimReducer, self.gridResolution)
         self.data = np.array([[3, 5, 2, 8, 4, 4, 2, -10, 8, -2],
                         [8, 2, -6, 9, 5, 6, 6, 2, 9, -7],
                         [1, -1, -6, 0, 1, -7, -6, 6, 0, 2],
@@ -69,29 +92,3 @@ class TestSparseShiftedComputation(unittest.TestCase):
         pairs_sc = self.sc.get_similar_indices(self.data)
         pairs_ssc = self.ssc.get_similar_indices(self.data)
         self.assertEqual(len(pairs_sc), len(pairs_ssc))
-
-class TestSparseHybridComputation(unittest.TestCase):
-
-    def setUp(self):
-        self.gridResolution = 3
-        self.dimReducer = PCA(3)
-        self.sc = SparseComputation(self.dimReducer, self.gridResolution*2)
-        self.shc = SparseHybridComputation(self.dimReducer, self.gridResolution)
-        self.ssc = SparseShiftedComputation(self.dimReducer, self.gridResolution)
-        self.data = np.array([[3, 5, 2, 8, 4, 4, 2, -10, 8, -2],
-                        [8, 2, -6, 9, 5, 6, 6, 2, 9, -7],
-                        [1, -1, -6, 0, 1, -7, -6, 6, 0, 2],
-                        [8, 5, 8, 1, 1, 7, 2, 4, -7, -9],
-                        [-10, 10, 2, 5, -7, -10, -6, -3, 7, -4],
-                        [-6, -10, -8, 2, 2, 0, 4, 7, 9, -4],
-                        [-6, 9, 5, 4, 6, -3, 8, -10, 4, 2],
-                        [6, -8, -5, 4, -4, -1, -2, 5, 8, 6],
-                        [10, -2, 8, 9, -4, -8, 7, 10, -7, 0],
-                        [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
-
-    def test_shc_output(self):
-        pairs_sc = self.sc.get_similar_indices(self.data)
-        pairs_ssc = self.ssc.get_similar_indices(self.data)
-        pairs_shc = self.shc.get_similar_indices(self.data)
-        self.assertEqual(len(pairs_sc), len(pairs_shc))
-        self.assertEqual(len(pairs_ssc), len(pairs_shc))

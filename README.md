@@ -6,6 +6,12 @@ The purpose is to overcome thecomputational burden of computing all pairwise sim
 
 The input of data must be a numpy array of n observations, each observations presenting p features. The sparse computation method works by first projecting the (high-dimensional) data set onto a low-dimensional space using a `DimReducer`. Then grid blocks are created and we use grid neighborhood to select the pairs that are deemed to be highly similar.
 
+## Installation
+From the main directory run the following command to install the package:
+```
+python setup.py install
+```
+
 ## DimReducer
 
 We first need to create an object of the class `DimReducer`. By definition all object of this class have a `dimLow` variable and a fit_transform function. Its goal is to project the high dimensional data onto a low dimensional space, reducing the number of columns to `dimLow`.

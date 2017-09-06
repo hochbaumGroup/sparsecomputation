@@ -7,7 +7,7 @@ class DimReducer:
     def __init__(self, dimLow=3):
         self.dimLow = dimLow
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, **kwargs):
         pass
 
 
@@ -34,7 +34,7 @@ class PCA (DimReducer):
             raise ValueError('dimLow should be positive')
         self.dimLow = dimLow
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
 
@@ -160,10 +160,13 @@ class ApproximatePCA(DimReducer):
         n = len(data[0])
         n_col = max(self.minCol, n*self.fracCol)
         n_col = int(min(n_col, len(data[0])))
-        list_col = np.random.choice(range(n), n_col, 0, proba_col)
-        factor = np.sqrt(np.array(proba_col)[list_col]*n_col)
-        result = np.copy(data[:, list_col])/factor
-        return result
+        if n_col<n:
+            list_col = np.random.choice(range(n), n_col, 0, proba_col)
+            factor = np.sqrt(np.array(proba_col)[list_col]*n_col)
+            result = np.copy(data[:, list_col])/factor
+            return result
+        else:
+            return data
 
     def _row_reduction(self, data):
         '''
@@ -183,7 +186,7 @@ class ApproximatePCA(DimReducer):
         result = np.copy(data[list_rows, :])
         return result
 
-    def fit_transform(self, data):
+    def fit_transform(self, data, seed=None, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
 
@@ -206,7 +209,14 @@ class ApproximatePCA(DimReducer):
         if not isinstance(data, np.ndarray):
             return TypeError('Data should be a Numpy array')
 
-        col_reduced_data = self._col_reduction(data)
+        if abs(self.fracCol - 1.0) <= 1e-8:
+            col_reduced_data = data
+        else:
+            col_reduced_data = self._col_reduction(data)
+
+        if seed:
+            np.random.seed(seed)
+
         reduced_data = self._row_reduction(col_reduced_data)
         pca = sklearn.decomposition.PCA(n_components=self.dimLow)
         pca.fit(reduced_data)

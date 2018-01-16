@@ -241,7 +241,7 @@ class SparseComputation(object):
 
         return pairs
 
-    def select_pairs(self, data):
+    def select_pairs(self, data, seed=None):
         """Applies dimension reduction and selects pairs that are close in the
         low-dimensional space.
         Args:

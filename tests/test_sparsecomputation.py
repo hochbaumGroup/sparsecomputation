@@ -1,94 +1,167 @@
+import pytest
+
 import numpy as np
-import unittest
-import sys
-import six
-import os
-from sparsecomputation import SparseComputation, SparseComputationObjectShifting, SparseComputationBlockShifting
-from sparsecomputation.dimreducer import DimReducer, PCA
 
 
-class TestSparseComputation(unittest.TestCase):
+@pytest.fixture
+def SC():
+    """Simple Sparse Computation object"""
+    from sparsecomputation import SparseComputation
 
-    def setUp(self):
-        self.gridResolution = 2
-        self.dimReducer = DimReducer(3)
-        self.b = SparseComputation(self.dimReducer, self.gridResolution)
-        self.data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 0, 8],
-                              [3, 5, -1]])
+    return SparseComputation(None, resolution=4,
+                             method='block_shifting',
+                             rescale=None)
 
-    def test_pca_init(self):
-        self.assertEqual(self.b.gridResolution, self.gridResolution)
-        self.assertRaises(TypeError, SparseComputation, self.dimReducer, '1')
-        self.assertRaises(ValueError, SparseComputation, self.dimReducer, 0)
 
-    def test_rescale(self):
-        self.assertRaises(TypeError, self.b._rescale_data, [])
-        rescaled_data = self.b._rescale_data(self.data)
-        minimum = np.array(np.amin(rescaled_data, axis=0))
-        np.testing.assert_array_almost_equal(minimum, np.zeros(3), decimal=6)
-        maximum = np.array(np.amax(rescaled_data, axis=0))
-        elt = self.gridResolution - 1
-        np.testing.assert_array_almost_equal(maximum,
-                                             np.array([elt, elt, elt]))
-        exp_result = np.array([[0, 0, 0], [0, 1, 1], [1, 1, 1], [1, 0, 1],
-                               [0, 1, 0]])
-        np.testing.assert_array_almost_equal(rescaled_data,
-                                             exp_result)
+@pytest.fixture
+def data():
+    """Simple data object"""
+    return np.array([
+        [0, 0],
+        [0.375, 0.375],
+        [0.625, 0.375],
+        [0.375, 0.625],
+        [0.625, 0.625],
+        [0.5, 0.5],
+        [1.0, 1.0],
+        ])
 
-    def test_get_pairs(self):
-        self.assertRaises(TypeError, self.b._get_pairs, [])
-        pairs = self.b._get_pairs(self.data)
-        expected_pairs = [(1, 2), (0, 4), (0, 1), (0, 3), (0, 2),
-                                  (4, 1), (4, 3), (4, 2), (1, 3), (3, 2)]
-        six.assertCountEqual(self, pairs, expected_pairs)
 
-    def test_get_pairs_same_box(self):
-        pairs = self.b._get_pairs(np.array([[0, 0], [0, 0]]))
-        expected_pairs = [(0, 1)]
-        six.assertCountEqual(self, pairs, expected_pairs)
+@pytest.fixture
+def IDs():
+    """Grid indices of points in data"""
+    return np.array([
+        [0, 0],
+        [1, 1],
+        [2, 1],
+        [1, 2],
+        [2, 2],
+        [2, 2],
+        [4, 4],
+    ])
 
-class TestSparseComputationBlockShifting(unittest.TestCase):
 
-    def setUp(self):
-        self.gridResolution = 3
-        self.dimReducer = PCA(3)
-        self.sc = SparseComputation(self.dimReducer, self.gridResolution*2)
-        self.shc = SparseComputationBlockShifting(self.dimReducer, self.gridResolution)
-        self.data = np.array([[3, 5, 2, 8, 4, 4, 2, -10, 8, -2],
-                        [8, 2, -6, 9, 5, 6, 6, 2, 9, -7],
-                        [1, -1, -6, 0, 1, -7, -6, 6, 0, 2],
-                        [8, 5, 8, 1, 1, 7, 2, 4, -7, -9],
-                        [-10, 10, 2, 5, -7, -10, -6, -3, 7, -4],
-                        [-6, -10, -8, 2, 2, 0, 4, 7, 9, -4],
-                        [-6, 9, 5, 4, 6, -3, 8, -10, 4, 2],
-                        [6, -8, -5, 4, -4, -1, -2, 5, 8, 6],
-                        [10, -2, 8, 9, -4, -8, 7, 10, -7, 0],
-                        [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
+@pytest.fixture
+def boxDict():
+    """Dict of points in each block"""
+    return {
+        (0, 0): [0, ],
+        (1, 1): [1, ],
+        (2, 1): [2, ],
+        (1, 2): [3, ],
+        (2, 2): [4, 5, ],
+        (4, 4): [6, ],
+    }
 
-    def test_shc_output(self):
-        pairs_sc = self.sc.get_similar_indices(self.data)
-        pairs_shc = self.shc.get_similar_indices(self.data)
-        self.assertEqual(len(pairs_sc), len(pairs_shc))
 
-class TestSparseComputationObjectShifting(unittest.TestCase):
+@pytest.fixture
+def reps():
+    """Numpy array of representative objects"""
+    return np.array([
+        [0.125, 0.125],
+        [0.375, 0.375],
+        [0.375, 0.625],
+        [0.625, 0.375],
+        [0.625, 0.625],
+        [1.125, 1.125],
+        ])
 
-    def setUp(self):
-        self.gridResolution = 3
-        self.dimReducer = PCA(3)
-        self.sc = SparseComputation(self.dimReducer, self.gridResolution*2)
-        self.ssc = SparseComputationObjectShifting(self.dimReducer, self.gridResolution)
-        self.data = np.array([[3, 5, 2, 8, 4, 4, 2, -10, 8, -2],
-                        [8, 2, -6, 9, 5, 6, 6, 2, 9, -7],
-                        [1, -1, -6, 0, 1, -7, -6, 6, 0, 2],
-                        [8, 5, 8, 1, 1, 7, 2, 4, -7, -9],
-                        [-10, 10, 2, 5, -7, -10, -6, -3, 7, -4],
-                        [-6, -10, -8, 2, 2, 0, 4, 7, 9, -4],
-                        [-6, 9, 5, 4, 6, -3, 8, -10, 4, 2],
-                        [6, -8, -5, 4, -4, -1, -2, 5, 8, 6],
-                        [10, -2, 8, 9, -4, -8, 7, 10, -7, 0],
-                        [10, 4, 4, -9, -9, 8, -6, 1, -7, 10]])
 
-    def test_ssc_output(self):
-        pairs_sc = self.sc.get_similar_indices(self.data)
-        pairs_ssc = self.ssc.get_similar_indices(self.data)
-        self.assertEqual(len(pairs_sc), len(pairs_ssc))
+@pytest.fixture
+def pairs():
+    """List of pairs"""
+    return [
+        (0, 1),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (1, 5),
+        (2, 3),
+        (2, 4),
+        (2, 5),
+        (3, 4),
+        (3, 5),
+        (4, 5),
+        ]
+
+
+def test_init(SC):
+    assert SC.method == 'block_shifting'
+    assert SC.rescale is None
+    assert SC.resolution == 4
+    assert SC.distance == 0.25
+    assert SC.dimReducer is None
+    assert SC.stats is None
+
+
+def test_project_onto_grid(SC, data, IDs):
+    np.testing.assert_array_equal(SC._project_onto_grid(data, 0.25), IDs)
+
+
+def test_get_box_id(SC, IDs, boxDict):
+    assert SC._get_box_dict(IDs) == boxDict
+
+
+def test_generate_shifts(SC):
+    assert SC._generate_shifts(2) == [
+        (0, 0),
+        (0, 1),
+        (1, 0),
+        (1, 1),
+    ]
+
+
+def test_pairs_within_block(SC, boxDict):
+    assert SC._select_within_block_pairs(boxDict) == [
+        (4, 5),
+    ]
+
+
+def test_create_representatives(SC, boxDict, reps):
+    boxes = sorted(boxDict.keys())
+    np.testing.assert_almost_equal(SC._create_representatives(boxes), reps)
+
+
+def test_block_enumeration(SC, data, pairs):
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC._block_enumeration(data)
+        ])
+    assert sortedPairs == pairs
+
+
+def test_object_shifting(SC, data, pairs):
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC._object_shifting(data)
+        ])
+    assert sortedPairs == pairs
+
+
+def test_block_shifting(SC, data, pairs):
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC._block_shifting(data)
+        ])
+    assert sortedPairs == pairs
+
+
+def test_select_pairs(SC, data, pairs):
+    SC.method = 'block_enumeration'
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+    assert sortedPairs == pairs
+
+    SC.method = 'block_shifting'
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+    assert sortedPairs == pairs
+
+    SC.method = 'object_shifting'
+    sortedPairs = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+    assert sortedPairs == pairs
+
+    SC.method = 'test'
+    with pytest.raises(ValueError):
+        SC.select_pairs(data)

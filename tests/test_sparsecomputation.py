@@ -94,6 +94,16 @@ def test_init(SC):
     assert SC.stats is None
 
 
+def test_init_both_none_distance_resolution():
+    from sparsecomputation import SparseComputation
+
+    with pytest.raises(ValueError):
+        SparseComputation(None, resolution=4, distance=1.0)
+
+    with pytest.raises(ValueError):
+        SparseComputation(None)
+
+
 def test_project_onto_grid(SC, data, IDs):
     np.testing.assert_array_equal(SC._project_onto_grid(data, 0.25), IDs)
 
@@ -171,6 +181,11 @@ def test_rescale_data(SC, data):
     with pytest.raises(ValueError):
         SC.rescale = 'test'
         SC._rescale_data(data)
+
+
+def test_select_pairs_no_array(SC):
+    with pytest.raises(ValueError):
+        SC.select_pairs('test')
 
 
 def test_select_pairs(SC, data, pairs):

@@ -27,10 +27,12 @@ class SparseComputation(object):
         self.stats = None
 
     def _rescale_min_max(self, data, eps=1e-8):
-        '''
-        Rescale the data from 0 to gridResolution-1
-        input: numpy array
-        output: numpy array
+        '''Rescale the data to interval [0, 1) in each dimension.
+        Args:
+            data (n x p numpy array): Data to rescale
+            eps=1e-8 (float): Largest data point is projected to 1-eps
+        Returns:
+            rescaledData (n x p numpy array): Rescaled data
         '''
         maximum = np.amax(data, axis=0, keepdims=True)
         minimum = np.amin(data, axis=0, keepdims=True)
@@ -38,10 +40,10 @@ class SparseComputation(object):
         gap = maximum - minimum
         gap = np.where(gap > 0, gap, 1.0)
 
-        rescaledData = (data - minimum) * gap
+        rescaledData = (data - minimum) / gap
 
-        rescaledData = np.where(rescaled_data >= 1.0,
-                                rescaled_data, 1.0 - eps)
+        rescaledData = np.where(rescaledData >= 1.0,
+                                1.0 - eps, rescaledData)
         return rescaledData
 
     def _rescale_data(self, data):

@@ -143,6 +143,36 @@ def test_block_shifting(SC, data, pairs):
     assert sortedPairs == pairs
 
 
+@pytest.mark.parametrize("data,expected", [
+    (data(), data()),
+    (np.array([
+        [1.0, 0.0],
+        [1.5, 1.5],
+        [2.0, 3.0],
+        ]),
+     np.array([
+         [0.0, 0.0],
+         [0.5, 0.5],
+         [1.0, 1.0],
+         ])
+     ),
+])
+def test_rescale_min_max(SC, data, expected):
+    np.testing.assert_almost_equal(SC._rescale_min_max(data), expected)
+
+
+def test_rescale_data(SC, data):
+    SC.rescale = None
+    np.testing.assert_almost_equal(SC._rescale_data(data), data)
+
+    SC.rescale = 'min_max'
+    np.testing.assert_almost_equal(SC._rescale_data(data), data)
+
+    with pytest.raises(ValueError):
+        SC.rescale = 'test'
+        SC._rescale_data(data)
+
+
 def test_select_pairs(SC, data, pairs):
     SC.method = 'block_enumeration'
     sortedPairs = sorted([

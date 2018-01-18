@@ -90,25 +90,25 @@ class ApproximatePCA(DimReducer):
             minCol (int): minimum number of rows to be used to fit the data
         '''
         if not isinstance(dimLow, int):
-            return TypeError('dim Low should be an integer')
+            raise TypeError('dim Low should be an integer')
         if dimLow < 1:
-            return ValueError('dimLow should be positive')
+            raise ValueError('dimLow should be positive')
         if not (isinstance(fracRow, float) or isinstance(fracRow, int)):
-            return TypeError('fracRow should be float')
+            raise TypeError('fracRow should be float')
         if fracRow <= 0 or fracRow > 1:
-            return ValueError('fracRow should be between 0 and 1')
+            raise ValueError('fracRow should be between 0 and 1')
         if not (isinstance(fracCol, float) or isinstance(fracCol, int)):
-            return TypeError('fracCol should be a float')
+            raise TypeError('fracCol should be a float')
         if fracCol <= 0 or fracCol > 1:
-            return ValueError('fracCol should be between 0 and 1')
+            raise ValueError('fracCol should be between 0 and 1')
         if not isinstance(minRow, int):
-            return TypeError('minRow should be integer')
+            raise TypeError('minRow should be integer')
         if minRow <= 0:
-            return ValueError('minRow should be a positive integer')
+            raise ValueError('minRow should be a positive integer')
         if not isinstance(minCol, int):
-            return TypeError('minCol should be an integer')
+            raise TypeError('minCol should be an integer')
         if minCol <= 0:
-            return ValueError('minCol should be a positive integer')
+            raise ValueError('minCol should be a positive integer')
 
         self.dimLow = dimLow
         self.fracRow = fracRow
@@ -207,7 +207,7 @@ class ApproximatePCA(DimReducer):
                            columns
         '''
         if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
+            raise TypeError('Data should be a Numpy array')
 
         if abs(self.fracCol - 1.0) <= 1e-8:
             col_reduced_data = data

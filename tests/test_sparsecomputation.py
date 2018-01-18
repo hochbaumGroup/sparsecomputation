@@ -212,7 +212,7 @@ def test_select_pairs(SC, data, pairs):
 
 
 def test_fit_transform_dim_reducer(SC):
-    from test_dim_reducer import PCA, data
+    from test_dimreducer import PCA, data
 
     data = data()
     pca = PCA()

@@ -105,7 +105,7 @@ def test_init_both_none_distance_resolution():
 
 
 def test_project_onto_grid(SC, data, IDs):
-    np.testing.assert_array_equal(SC._project_onto_grid(data, 0.25), IDs)
+    np.testing.assert_equal(SC._project_onto_grid(data, 0.25), IDs)
 
 
 def test_get_box_id(SC, IDs, boxDict):
@@ -129,7 +129,7 @@ def test_pairs_within_block(SC, boxDict):
 
 def test_create_representatives(SC, boxDict, reps):
     boxes = sorted(boxDict.keys())
-    np.testing.assert_almost_equal(SC._create_representatives(boxes), reps)
+    np.testing.assert_allclose(SC._create_representatives(boxes), reps)
 
 
 def test_block_enumeration(SC, data, pairs):
@@ -168,15 +168,15 @@ def test_block_shifting(SC, data, pairs):
      ),
 ])
 def test_rescale_min_max(SC, data, expected):
-    np.testing.assert_almost_equal(SC._rescale_min_max(data), expected)
+    np.testing.assert_allclose(SC._rescale_min_max(data), expected)
 
 
 def test_rescale_data(SC, data):
     SC.rescale = None
-    np.testing.assert_almost_equal(SC._rescale_data(data), data)
+    np.testing.assert_allclose(SC._rescale_data(data), data)
 
     SC.rescale = 'min_max'
-    np.testing.assert_almost_equal(SC._rescale_data(data), data)
+    np.testing.assert_allclose(SC._rescale_data(data), data)
 
     with pytest.raises(ValueError):
         SC.rescale = 'test'
@@ -184,7 +184,7 @@ def test_rescale_data(SC, data):
 
 
 def test_select_pairs_no_array(SC):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         SC.select_pairs('test')
 
 

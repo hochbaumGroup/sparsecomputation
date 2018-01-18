@@ -1,5 +1,4 @@
 import pytest
-
 import numpy as np
 
 
@@ -210,3 +209,14 @@ def test_select_pairs(SC, data, pairs):
     SC.method = 'test'
     with pytest.raises(ValueError):
         SC.select_pairs(data)
+
+
+def test_fit_transform_dim_reducer(SC):
+    from test_dim_reducer import PCA, data
+
+    data = data()
+    pca = PCA()
+
+    SC.dimReducer = pca
+
+    assert SC.select_pairs(data) == list()

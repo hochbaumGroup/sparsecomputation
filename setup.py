@@ -1,11 +1,6 @@
 from setuptools import setup
+from setuptools import find_packages
 import unittest
-
-
-def test_suite():
-    test_loader = unittest.TestLoader()
-    test_suite = test_loader.discover('tests')
-    return test_suite
 
 
 def readme():
@@ -33,7 +28,10 @@ setup(name='sparsecomputation',
       author_email='qspaen@berkeley.edu',
       license=license(),
       long_description=readme(),
-      packages=['sparsecomputation'],
+      packages=find_packages('src'),
+      package_dir={'': 'src'},
       install_requires=['numpy', 'scipy', 'sklearn', 'six'],
-      test_suite='setup.test_suite',
-      zip_safe=False)
+      setup_requires=['pytest-runner', ],
+      tests_require=['pytest', ],
+      zip_safe=False
+      )

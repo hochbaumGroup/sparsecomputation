@@ -123,9 +123,6 @@ class ApproximatePCA(DimReducer):
         input: numpy array
         output: numpy array
         '''
-        if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
-
         data = (data.astype(float))
         result = sum(data ** 2)
         result /= sum(result)
@@ -138,9 +135,6 @@ class ApproximatePCA(DimReducer):
         input: numpy array
         output: numpy array
         '''
-        if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
-
         data = data.astype(float)
         result = np.sum(data**2, axis=1)
         result /= sum(result)
@@ -153,9 +147,6 @@ class ApproximatePCA(DimReducer):
         input: numpy array
         output: numpy array
         '''
-        if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
-
         proba_col = self._get_proba_col(data)
         n = len(data[0])
         n_col = max(self.minCol, n*self.fracCol, self.dimLow)
@@ -175,9 +166,6 @@ class ApproximatePCA(DimReducer):
         input: numpy array
         output: numpy array
         '''
-        if not isinstance(data, np.ndarray):
-            return TypeError('Data should be a Numpy array')
-
         proba_row = self._get_proba_row(data)
         n = len(data)
         n_row = max(self.minRow, n*self.fracRow)

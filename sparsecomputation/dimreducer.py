@@ -158,7 +158,7 @@ class ApproximatePCA(DimReducer):
 
         proba_col = self._get_proba_col(data)
         n = len(data[0])
-        n_col = max(self.minCol, n*self.fracCol)
+        n_col = max(self.minCol, n*self.fracCol, self.dimLow)
         n_col = int(min(n_col, len(data[0])))
         if n_col<n:
             list_col = np.random.choice(range(n), n_col, 0, proba_col)

@@ -87,10 +87,16 @@ def pairs():
 def test_init(SC):
     assert SC.method == 'block_shifting'
     assert SC.rescale is None
-    assert SC.resolution == 4
+    assert SC.resolution == 4.0
     assert SC.distance == 0.25
     assert SC.dimReducer is None
     assert SC.stats is None
+
+
+def test_resolution_setter(SC):
+    SC.resolution = 5
+    assert SC.resolution == 5.0
+    assert SC.distance == 0.2
 
 
 def test_init_both_none_distance_resolution():

@@ -13,11 +13,9 @@ class SparseComputation(object):
             raise ValueError('Please set either the distance parameter or the' +
                              'resolution parameter but not both.')
         elif resolution is not None:
-            self.resolution = resolution
             self.distance = 1 / float(resolution)
         elif distance is not None:
             self.distance = distance
-            self.resolution = None
         else:
             raise ValueError('Either the parameter resolution or distance' +
                              'should be set')
@@ -25,6 +23,14 @@ class SparseComputation(object):
         self.rescale = rescale
         self.method = method
         self.stats = None
+
+    @property
+    def resolution(self):
+        return 1 / float(self.distance)
+
+    @resolution.setter
+    def resolution(self, x):
+        self.distance = 1 / float(x)
 
     def _rescale_min_max(self, data, eps=1e-8):
         '''Rescale the data to interval [0, 1) in each dimension.

@@ -219,6 +219,5 @@ class ApproximatePCA(DimReducer):
 
         reduced_data = self._row_reduction(col_reduced_data)
         pca = sklearn.decomposition.PCA(n_components=self.dimLow)
-        pca.fit(reduced_data)
-        data = pca.transform(col_reduced_data)
+        data = pca.fit_transform(col_reduced_data)
         return data

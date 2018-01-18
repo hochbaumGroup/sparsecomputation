@@ -226,3 +226,33 @@ def test_fit_transform_dim_reducer(SC):
     SC.dimReducer = pca
 
     assert SC.select_pairs(data) == list()
+
+
+def test_select_pairs_real_data(SC):
+    from sparsecomputation import PCA
+    from sklearn.datasets import load_iris
+
+    data, _ = load_iris(return_X_y=True)
+
+    pca = PCA(3)
+
+    SC.dimReducer = pca
+    SC.resolution = 25
+    SC.rescale = 'min_max'
+
+    SC.method = 'block_enumeration'
+    sortedPairsBE = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+
+    SC.method = 'block_shifting'
+    sortedPairsBS = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+    assert sortedPairsBE == sortedPairsBS
+
+    SC.method = 'object_shifting'
+    sortedPairsOS = sorted([
+        tuple(sorted(x)) for x in SC.select_pairs(data)
+        ])
+    assert sortedPairsBE == sortedPairsOS

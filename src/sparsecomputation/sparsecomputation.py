@@ -227,7 +227,7 @@ class SparseComputation(object):
         rescaledData = self._rescale_data(data)
         boxIDs = self._project_onto_grid(rescaledData, self.distance)
         boxDict = self._get_box_dict(boxIDs)
-        boxes = boxDict.keys()
+        boxes = list(boxDict.keys())
 
         repData = self._create_representatives(boxes)
 

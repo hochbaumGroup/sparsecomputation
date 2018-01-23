@@ -1,5 +1,4 @@
 numpy
-scipy >= 0.9
+scipy
 sklearn
-coverage
 six

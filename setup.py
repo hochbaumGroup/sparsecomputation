@@ -32,6 +32,6 @@ setup(name='sparsecomputation',
       package_dir={'': 'src'},
       install_requires=['numpy', 'scipy', 'sklearn', 'six'],
       setup_requires=['pytest-runner', ],
-      tests_require=['pytest', ],
+      tests_require=['pytest', 'mock'],
       zip_safe=False
       )

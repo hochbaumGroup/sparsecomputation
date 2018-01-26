@@ -1,3 +1,5 @@
+![Travis build status](https://travis-ci.org/hochbaumGroup/sparsecomputation.svg?branch=master)
+
 # Sparse Computation
 `sparsecomputation` is a python package to construct a sparse similarity matrix from inputs in the form of pairwise similarities.
 

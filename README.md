@@ -41,3 +41,6 @@ For more details on the techniques read the following papers. Please cite this w
 - Dorit S. Hochbaum, Philipp Baumann (2016). Sparse computation for large-scale data mining. *IEEE Transactions on Big Data*, 2(2), 151-174.
 - Philipp Baumann, Dorit S. Hochbaum and Quico Spaen (2017). High-Performance Geometric Algorithms for Sparse Computation in Big Data Analytics. *2017 IEEE International Conference on Big Data*, Boston MA.
 - Philipp Baumann, Dorit S. Hochbaum, and Quico Spaen (2016). Sparse-Reduced Computation. *Proceedings of the 5th International Conference on Pattern Recognition Applications and Methods*.
+
+## Credits
+Original Matlab implementation by Philipp Baumann. Original Python implementation by Titouan Jehl and Quico Spaen. Updated implementation with the new block shifting algorithm by Quico Spaen and Philipp Baumann.

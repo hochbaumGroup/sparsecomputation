@@ -125,9 +125,12 @@ def test_dimreducer_fit_transform_not_array(dimReducer):
         dimReducer.fit_transform('test')
 
 
-def test_fit_transform_apca(APCA, data, pcaResult):
+@patch('numpy.random.choice')
+def test_fit_transform_apca(m, APCA, data, pcaResult):
     APCA.minRow = 3
     APCA.minCol = 3
+
+    m.return_value = (0, 1, 2)
 
     np.testing.assert_allclose(APCA.fit_transform(data), pcaResult,
                                atol=1e-8)

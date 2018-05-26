@@ -34,6 +34,11 @@ class PCA (DimReducer):
             raise ValueError('dimLow should be positive')
         self.dimLow = dimLow
 
+        self._pca = sklearn.decomposition.PCA(n_components=self.dimLow)
+
+    def fit(self, data, **kwargs):
+        return self._pca.fit(data)
+
     def fit_transform(self, data, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
@@ -60,9 +65,11 @@ class PCA (DimReducer):
         if len(data[0]) < self.dimLow:
             raise ValueError('Data has less columns than dimLow')
 
-        pca = sklearn.decomposition.PCA(n_components=self.dimLow)
-        reducedData = pca.fit_transform(data)
+        reducedData = self._pca.fit_transform(data)
         return reducedData
+
+    def transform(self, data):
+        return self._pca.transform(data)
 
 
 class ApproximatePCA(DimReducer):
@@ -115,6 +122,8 @@ class ApproximatePCA(DimReducer):
         self.fracCol = fracCol
         self.minRow = minRow
         self.minCol = minCol
+
+        self._pca = sklearn.decomposition.PCA(n_components=self.dimLow)
 
     def _get_proba_col(self, data):
         '''
@@ -174,6 +183,18 @@ class ApproximatePCA(DimReducer):
         result = np.copy(data[list_rows, :])
         return result
 
+    def fit(self, data, seed=None, **kwargs):
+        if abs(self.fracCol - 1.0) > 1e-8:
+            raise NotImplementedError(
+                'Fit & Transform methods are not implemented for column '
+                'reduced data.')
+
+        if seed:
+            np.random.seed(seed)
+
+        reduced_data = self._row_reduction(data)
+        self._pca.fit(reduced_data)
+
     def fit_transform(self, data, seed=None, **kwargs):
         '''`fit_transform` projects the input data on a lower dimensional space
         of dimension `dimLow`
@@ -206,6 +227,8 @@ class ApproximatePCA(DimReducer):
             np.random.seed(seed)
 
         reduced_data = self._row_reduction(col_reduced_data)
-        pca = sklearn.decomposition.PCA(n_components=self.dimLow)
-        data = pca.fit_transform(col_reduced_data)
+        data = self._pca.fit_transform(reduced_data)
         return data
+
+    def transform(self, data, **kwargs):
+        return self._pca.transform(data)

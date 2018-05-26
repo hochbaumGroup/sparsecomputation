@@ -25,6 +25,13 @@ def APCA():
 
 
 @pytest.fixture
+def APCA():
+    from sparsecomputation import ApproximatePCA
+
+    return ApproximatePCA(2, fracRow=0.01, fracCol=0.01, minRow=1, minCol=1)
+
+
+@pytest.fixture
 def data():
     return np.array([
         [1, 0, 0],
@@ -72,6 +79,12 @@ def test_input_exceptions_fit_transform(PCA):
 
 def test_pca(PCA, data, pcaResult):
     np.testing.assert_allclose(PCA.fit_transform(data), pcaResult, atol=1e-8)
+
+
+def test_fit_transform_separate_pca(PCA, data, pcaResult):
+    PCA.fit(data)
+    np.testing.assert_allclose(PCA.transform(data), pcaResult,
+                               atol=1e-8)
 
 
 def test_approx_pca_init(APCA):
@@ -133,4 +146,17 @@ def test_fit_transform_apca(m, APCA, data, pcaResult):
     m.return_value = (0, 1, 2)
 
     np.testing.assert_allclose(APCA.fit_transform(data), pcaResult,
+                               atol=1e-8)
+
+
+@patch('numpy.random.choice')
+def test_fit_transform_separate_apca(m, APCA, data, pcaResult):
+    APCA.minRow = 3
+    APCA.minCol = 3
+    APCA.fracCol = 1.0
+
+    m.return_value = (0, 1, 2)
+
+    APCA.fit(data)
+    np.testing.assert_allclose(APCA.transform(data), pcaResult,
                                atol=1e-8)

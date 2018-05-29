@@ -227,8 +227,8 @@ class ApproximatePCA(DimReducer):
             np.random.seed(seed)
 
         reduced_data = self._row_reduction(col_reduced_data)
-        data = self._pca.fit_transform(reduced_data)
-        return data
+        self._pca.fit(reduced_data)
+        return self._pca.transform(col_reduced_data)
 
     def transform(self, data, **kwargs):
         return self._pca.transform(data)

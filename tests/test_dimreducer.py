@@ -87,6 +87,14 @@ def test_fit_transform_separate_pca(PCA, data, pcaResult):
                                atol=1e-8)
 
 
+def test_dimension_consistance_apca(APCA):
+    data = np.random.normal(0, 1, size=(400, 4))
+    APCA.fracRow = 0.5
+    out = APCA.fit_transform(data)
+
+    assert out.shape == (400, 2)
+
+
 def test_approx_pca_init(APCA):
     assert APCA.fracRow == 0.01
     assert APCA.fracCol == 0.01

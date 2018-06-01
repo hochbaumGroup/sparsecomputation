@@ -73,7 +73,7 @@ class SparseComputation(object):
             Grid indices (n x p numpy array)
         """
         projectedData = data / float(distance)
-        projectedData = projectedData.astype('int')
+        projectedData = np.floor(projectedData).astype('int')
         return projectedData
 
     def _get_box_dict(self, data):

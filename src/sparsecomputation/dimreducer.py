@@ -179,9 +179,12 @@ class ApproximatePCA(DimReducer):
         n = len(data)
         n_row = max(self.minRow, n*self.fracRow)
         n_row = int(min(n_row, len(data)))
-        list_rows = np.random.choice(range(0, n), n_row, 0, proba_row)
-        result = np.copy(data[list_rows, :])
-        return result
+        if n == n_row:
+            return data
+        else:
+            list_rows = np.random.choice(range(0, n), n_row, 0, proba_row)
+            result = np.copy(data[list_rows, :])
+            return result
 
     def fit(self, data, seed=None, **kwargs):
         if abs(self.fracCol - 1.0) > 1e-8:

@@ -4,21 +4,29 @@ import numpy as np
 
 
 class SparseComputation(object):
-
-    def __init__(self, dim_reducer, distance=None, resolution=None,
-                 method='block_shifting', rescale='min_max'):
+    def __init__(
+        self,
+        dim_reducer,
+        distance=None,
+        resolution=None,
+        method="block_shifting",
+        rescale="min_max",
+    ):
         self.dimReducer = dim_reducer
 
         if (distance is not None) and (resolution is not None):
-            raise ValueError('Please set either the distance parameter or the' +
-                             'resolution parameter but not both.')
+            raise ValueError(
+                "Please set either the distance parameter or the"
+                + "resolution parameter but not both."
+            )
         elif resolution is not None:
             self.distance = 1 / float(resolution)
         elif distance is not None:
             self.distance = distance
         else:
-            raise ValueError('Either the parameter resolution or distance' +
-                             'should be set')
+            raise ValueError(
+                "Either the parameter resolution or distance" + "should be set"
+            )
 
         self.rescale = rescale
         self.method = method
@@ -33,13 +41,13 @@ class SparseComputation(object):
         self.distance = 1 / float(x)
 
     def _rescale_min_max(self, data, eps=1e-8):
-        '''Rescale the data to interval [0, 1) in each dimension.
+        """Rescale the data to interval [0, 1) in each dimension.
         Args:
             data (n x p numpy array): Data to rescale
             eps=1e-8 (float): Largest data point is projected to 1-eps
         Returns:
             rescaledData (n x p numpy array): Rescaled data
-        '''
+        """
         maximum = np.amax(data, axis=0, keepdims=True)
         minimum = np.amin(data, axis=0, keepdims=True)
 
@@ -48,19 +56,19 @@ class SparseComputation(object):
 
         rescaledData = (data - minimum) / gap
 
-        rescaledData = np.where(rescaledData >= 1.0,
-                                1.0 - eps, rescaledData)
+        rescaledData = np.where(rescaledData >= 1.0, 1.0 - eps, rescaledData)
         return rescaledData
 
     def _rescale_data(self, data):
         if self.rescale is None:
             return data
-        elif self.rescale == 'min_max':
+        elif self.rescale == "min_max":
             return self._rescale_min_max(data)
         else:
             raise ValueError(
-                'Current rescaling method: %s is not defined.' % self.rescale +
-                'Set self.rescale to "min_max" or None.')
+                "Current rescaling method: %s is not defined." % self.rescale
+                + 'Set self.rescale to "min_max" or None.'
+            )
 
     def _project_onto_grid(self, data, distance):
         """Project onto a grid with block width `distance`.
@@ -73,7 +81,7 @@ class SparseComputation(object):
             Grid indices (n x p numpy array)
         """
         projectedData = data / float(distance)
-        projectedData = np.floor(projectedData).astype('int')
+        projectedData = np.floor(projectedData).astype("int")
         return projectedData
 
     def _get_box_dict(self, data):
@@ -112,9 +120,7 @@ class SparseComputation(object):
         """
         shifts = []
         for i in range(2 ** numDims):
-            shifts.append(
-                tuple([int(x) for x in np.binary_repr(i, numDims)])
-            )
+            shifts.append(tuple([int(x) for x in np.binary_repr(i, numDims)]))
         return shifts
 
     def _block_enumeration(self, data):
@@ -132,11 +138,11 @@ class SparseComputation(object):
 
         pairs = []
 
-        increments = tuple(increment
-                           for increment
-                           in product(range(-1, 2), repeat=numDims)
-                           if increment > ((0, ) * numDims)
-                           )
+        increments = tuple(
+            increment
+            for increment in product(range(-1, 2), repeat=numDims)
+            if increment > ((0,) * numDims)
+        )
 
         # initialize stats
         numAdjacentBoxes = 0
@@ -145,9 +151,9 @@ class SparseComputation(object):
         for boxID, objects in boxDict.items():
             pairs += combinations(objects, 2)
             for increment in increments:
-                incrementedID = tuple(a + b
-                                      for a, b
-                                      in six.moves.zip(boxID, increment))
+                incrementedID = tuple(
+                    a + b for a, b in six.moves.zip(boxID, increment)
+                )
 
                 numAdjacentBoxes += 1
 
@@ -158,12 +164,13 @@ class SparseComputation(object):
 
         # assign stats
         stats = {}
-        stats['numBoxes'] = len(boxDict)
-        stats['numUniquePairs'] = len(pairs)
-        stats['numAdjacentBoxes'] = numAdjacentBoxes
-        stats['numNonemptyAdjacentBoxes'] = numNonemptyAdjacentBoxes
-        stats['numEmptyAdjacentBoxes'] = (numAdjacentBoxes -
-                                          numNonemptyAdjacentBoxes)
+        stats["numBoxes"] = len(boxDict)
+        stats["numUniquePairs"] = len(pairs)
+        stats["numAdjacentBoxes"] = numAdjacentBoxes
+        stats["numNonemptyAdjacentBoxes"] = numNonemptyAdjacentBoxes
+        stats["numEmptyAdjacentBoxes"] = (
+            numAdjacentBoxes - numNonemptyAdjacentBoxes
+        )
         self.stats = stats
 
         return pairs
@@ -198,8 +205,9 @@ class SparseComputation(object):
         numPairs = 0
 
         for shift in shifts:
-            shiftedData = rescaledData + [float(x) * self.distance
-                                          for x in shift]
+            shiftedData = rescaledData + [
+                float(x) * self.distance for x in shift
+            ]
             boxIDs = self._project_onto_grid(shiftedData, 2 * self.distance)
             boxDict = self._get_box_dict(boxIDs)
             shiftPairs = self._select_within_block_pairs(boxDict)
@@ -208,10 +216,10 @@ class SparseComputation(object):
             pairs = pairs.union(shiftPairs)
 
         stats = {}
-        stats['numUniquePairs'] = len(pairs)
-        stats['numTotalPairs'] = numPairs
-        stats['numDuplicatePairs'] = numPairs - len(pairs)
-        stats['numShifts'] = len(shifts)
+        stats["numUniquePairs"] = len(pairs)
+        stats["numTotalPairs"] = numPairs
+        stats["numDuplicatePairs"] = numPairs - len(pairs)
+        stats["numShifts"] = len(shifts)
         self.stats = stats
 
         return list(pairs)
@@ -231,9 +239,12 @@ class SparseComputation(object):
 
         repData = self._create_representatives(boxes)
 
-        scObject = SparseComputation(None, distance=self.distance,
-                                     method='object_shifting',
-                                     rescale=None)
+        scObject = SparseComputation(
+            None,
+            distance=self.distance,
+            method="object_shifting",
+            rescale=None,
+        )
         adjacentBoxes = scObject.select_pairs(repData)
 
         pairs = self._select_within_block_pairs(boxDict)
@@ -243,8 +254,8 @@ class SparseComputation(object):
             pairs += product(boxDict[boxes[box1]], boxDict[boxes[box2]])
 
         stats = scObject.stats
-        stats['numUniquePairs'] = len(pairs)
-        stats['numTotalPairs'] += numWithinBlockPairs
+        stats["numUniquePairs"] = len(pairs)
+        stats["numTotalPairs"] += numWithinBlockPairs
         self.stats = stats
 
         return pairs
@@ -258,7 +269,7 @@ class SparseComputation(object):
             List of tuples where each tuple is a pair.
         """
         if not isinstance(data, np.ndarray):
-            raise TypeError('data should be a numpy array')
+            raise TypeError("data should be a numpy array")
 
         # Reduce dimensionality of data only if a dimReducer is provided
         if self.dimReducer is None:
@@ -266,15 +277,16 @@ class SparseComputation(object):
         else:
             reducedData = self.dimReducer.fit_transform(data, seed=seed)
 
-        if self.method == 'block_enumeration':
+        if self.method == "block_enumeration":
             return self._block_enumeration(reducedData)
-        elif self.method == 'object_shifting':
+        elif self.method == "object_shifting":
             return self._object_shifting(reducedData)
-        elif self.method == 'block_shifting':
+        elif self.method == "block_shifting":
             return self._block_shifting(reducedData)
         else:
             raise ValueError(
-                'Current method: %s is not defined. ' % self.method +
-                'Set self.method to' +
-                '\'block_enumeration\', \'object_shifting\', or ' +
-                '\'block_shifting\' (default).')
+                "Current method: %s is not defined. " % self.method
+                + "Set self.method to"
+                + "'block_enumeration', 'object_shifting', or "
+                + "'block_shifting' (default)."
+            )

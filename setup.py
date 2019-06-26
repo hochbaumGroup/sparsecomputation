@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setup(
     name="sparsecomputation",
-    version="2019.6.2",
+    version="2019.6.3",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3.5",

@@ -27,6 +27,7 @@ setup(
     author_email="qspaen@berkeley.edu",
     license=license(),
     long_description=readme(),
+    long_description_content_type="text/markdown",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=["numpy", "scipy", "sklearn", "six"],

@@ -1,0 +1,18 @@
+atomicwrites==1.1.5
+attrs==18.1.0
+coverage==4.5.1
+mock==3.0.5
+more-itertools==4.2.0
+numpy==1.14.3
+pbr==4.0.3
+pluggy==0.6.0
+py==1.5.3
+pytest==3.6.0
+pytest-cov==2.5.1
+pytest-cover==3.0.0
+pytest-coverage==0.0
+scikit-learn==0.19.1
+scipy==1.1.0
+six==1.11.0
+sklearn==0.0
+-e git+git@github.com:quic0/sparseComputation.git@810fb85e10065aec54511ebc12826e3ff161cad2#egg=sparsecomputation

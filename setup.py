@@ -15,13 +15,13 @@ def license():
 
 setup(
     name="sparsecomputation",
-    version="0.1dev",
+    version="2019.6.1",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.5",
     ],
-    description="Sparse Computation for sparsifying similarity matrices",
+    description="Sparse Computation algorithm for sparsifying similarity matrices.",
     keywords="pairwise similarity, classification, sparsification," + "clustering",
     url="https://github.com/hochbaumGroup/sparsecomputation",
     author="Titouan Jehl, Quico Spaen, Philipp Baumann",

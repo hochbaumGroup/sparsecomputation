@@ -18,7 +18,6 @@ setup(
     version="2019.6.1",
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.5",
     ],
     description="Sparse Computation algorithm for sparsifying similarity matrices.",

@@ -1,16 +1,11 @@
-from setuptools import setup
-from setuptools import find_packages
-import unittest
+from setuptools import setup, find_packages
+
+with open("README.md") as f:
+    long_description = f.read()
 
 
-def readme():
-    with open("README.md") as f:
-        return f.read()
-
-
-def license():
-    with open("LICENSE.md") as f:
-        return f.read()
+with open("LICENSE.md") as f:
+    license = f.read()
 
 
 setup(
@@ -25,11 +20,10 @@ setup(
     url="https://github.com/hochbaumGroup/sparsecomputation",
     author="Titouan Jehl, Quico Spaen, Philipp Baumann",
     author_email="qspaen@berkeley.edu",
-    license=license(),
-    long_description=readme(),
+    license=license,
+    long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=["numpy", "scipy", "sklearn", "six"],
-    zip_safe=False,
 )

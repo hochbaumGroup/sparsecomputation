@@ -13,7 +13,7 @@ You can use `pip` to install the package:
 pip instal sparsecomputation
 ```
 
-## Minimal Example
+## Example
 To find the relevant pairwise similarities with Sparse Computation, use the following code:
 ```python
 # load sample dataset
@@ -35,6 +35,8 @@ sc = SparseComputation(apca, distance=0.05)
 pairs = sc.select_pairs(data)
 # Out: [(101, 142), (1, 9), (1, 34), (1, 37), ...]
 ```
+
+The default implementation for sparse computation is based on block shifting. You can select an alternative implementation by setting the `method` parameter of the `SparseComputation` object.
 
 ## Relevant Papers
 For more details on the techniques read the following papers. Please cite these works if you use this implementation in academic work:

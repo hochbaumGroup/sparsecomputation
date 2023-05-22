@@ -19,7 +19,7 @@ pytest-cov==2.5.1
 pytest-cover==3.0.0
 pytest-coverage==0.0
 readme-renderer==24.0
-requests==2.22.0
+requests==2.31.0
 requests-toolbelt==0.9.1
 scikit-learn==0.19.1
 scipy==1.1.0
